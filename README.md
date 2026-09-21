@@ -27,6 +27,11 @@ GitHub Pages で配信する。**アプリのソースはここには置かな�
 元を直してから、ここへ写してコミットする。ここだけ直すと、次に写したときに
 元へ戻ってしまう。
 
+```powershell
+Copy-Item ..\sudoku-app\publish\privacy-policy.html .\sudoku\privacy-policy.html
+git add -A; git commit; git push
+```
+
 ## GitHub Pages の設定
 
 リポジトリの Settings → Pages で、Source を「Deploy from a branch」、
