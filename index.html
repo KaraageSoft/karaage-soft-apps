@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!--
+  入口。アプリが増えたら、下のリストに1行足す。
+  中身はリンクだけなので、凝らない。
+-->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Karaage Soft</title>
+<style>
+  :root {
+    --bg: #fbf9f3;
+    --fg: #2c2a24;
+    --muted: #6a6555;
+    --rule: #ddd8c8;
+    --link: #2f6b4f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1b18;
+      --fg: #ece8dd;
+      --muted: #a09a89;
+      --rule: #3a382f;
+      --link: #86c7a4;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1b18;
+    --fg: #ece8dd;
+    --muted: #a09a89;
+    --rule: #3a382f;
+    --link: #86c7a4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+    line-height: 1.8;
+    font-size: 16px;
+  }
+  main { max-width: 36rem; margin: 0 auto; padding: 4rem 16px 5rem; }
+  h1 { font-size: 1.6rem; margin: 0 0 .25rem; }
+  .sub { color: var(--muted); margin: 0 0 3rem; }
+  h2 { font-size: 1.1rem; margin: 2.5rem 0 .25rem; padding-top: 1.5rem; border-top: 1px solid var(--rule); }
+  ul { margin: .5rem 0 0; padding-left: 1.25rem; }
+  li { margin: .35rem 0; }
+  a { color: var(--link); }
+  footer { color: var(--muted); font-size: .9rem; margin-top: 4rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Karaage Soft</h1>
+  <p class="sub">からあげソフト</p>
+
+  <h2>数独のお勉強 <span style="color:var(--muted);font-size:.9rem">Sudoku Practice</span></h2>
+  <ul>
+    <li><a href="sudoku/privacy-policy.html">プライバシーポリシー / Privacy Policy</a></li>
+  </ul>
+
+  <footer>karaagesoft@gmail.com</footer>
+</main>
+</body>
+</html>
