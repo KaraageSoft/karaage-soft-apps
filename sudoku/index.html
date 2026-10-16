@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<!--
+  数独のお勉強の紹介ページ（2026-10-17）。
+  まず日本語で作り、あとで 24 言語にする（ユーザーの方針）。
+  ・Google Play へのボタンと QR コード（img/qr-play.svg。アプリの toqr で作った）
+  ・ブラウザ版へのリンク（EAS Hosting の本番アドレス。npx eas-cli deploy --prod で出す）
+  ・画像はストアに出しているもの（sudoku-app/publish/store）
+  達人・裏面・免許皆伝・卒業証書のことは書かない（見つけてからのお楽しみ）。
+-->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数独のお勉強 － ヒントで解き方を覚える | Karaage Soft</title>
+<meta name="description" content="ヒントが盤面を光らせ、なぜそこに入るのかを1行ずつ説明。広告で待たされず、テンポよく解き方が身につく数独アプリです。">
+<meta property="og:title" content="数独のお勉強 － ヒントで解き方を覚える">
+<meta property="og:description" content="ヒントが盤面を光らせ、なぜそこに入るのかを1行ずつ説明。広告で待たされず、テンポよく解き方が身につく数独。">
+<meta property="og:image" content="https://karaagesoft.github.io/karaage-soft-apps/sudoku/img/icon.png">
+<link rel="icon" href="img/icon.png">
+<style>
+  :root {
+    --bg: #fbf9f3;
+    --card: #ffffff;
+    --fg: #2c2a24;
+    --muted: #6a6555;
+    --rule: #ddd8c8;
+    --link: #2f6b4f;
+    --accent: #2e7d32;
+    --accent-fg: #ffffff;
+    --soft: #eef6ee;
+    --blue: #66ccff;
+    --yellow: #fff2c4;
+    --shadow: 0 6px 24px rgba(44, 42, 36, 0.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1b18;
+      --card: #26251f;
+      --fg: #ece8dd;
+      --muted: #a09a89;
+      --rule: #3a382f;
+      --link: #86c7a4;
+      --accent: #4caf50;
+      --accent-fg: #0f1a10;
+      --soft: #22301f;
+      --yellow: #4a4430;
+      --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1b18;
+    --card: #26251f;
+    --fg: #ece8dd;
+    --muted: #a09a89;
+    --rule: #3a382f;
+    --link: #86c7a4;
+    --accent: #4caf50;
+    --accent-fg: #0f1a10;
+    --soft: #22301f;
+    --yellow: #4a4430;
+    --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+    line-height: 1.8;
+    font-size: 16px;
+  }
+  a { color: var(--link); }
+  .wrap { max-width: 60rem; margin: 0 auto; padding: 0 16px; }
+
+  /* 冒頭 */
+  .hero { padding: 3.5rem 0 2.5rem; }
+  .hero-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; align-items: center; }
+  @media (min-width: 760px) { .hero-grid { grid-template-columns: 1.3fr 1fr; } }
+  .title-row { display: flex; align-items: center; gap: 1rem; }
+  .title-row img { width: 72px; height: 72px; border-radius: 18px; box-shadow: var(--shadow); }
+  h1 { font-size: 1.9rem; line-height: 1.3; margin: 0; }
+  .en { color: var(--muted); font-size: .95rem; margin: .1rem 0 0; }
+  .lead { font-size: 1.15rem; margin: 1.5rem 0 1rem; }
+  .points { margin: 0 0 1.75rem; padding-left: 1.2rem; }
+  .points li { margin: .2rem 0; }
+  .buttons { display: flex; flex-wrap: wrap; gap: .75rem; }
+  .btn {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .8rem 1.3rem; border-radius: 999px; text-decoration: none; font-weight: 700;
+  }
+  .btn-main { background: var(--accent); color: var(--accent-fg); box-shadow: var(--shadow); }
+  .btn-sub { border: 2px solid var(--accent); color: var(--link); }
+  .btn svg { width: 1.2rem; height: 1.2rem; }
+  .note { color: var(--muted); font-size: .85rem; margin: .75rem 0 0; }
+  .qr-card {
+    justify-self: center; text-align: center;
+    background: var(--card); border-radius: 16px; padding: 1.25rem; box-shadow: var(--shadow);
+  }
+  .qr-card img { width: 180px; height: 180px; display: block; margin: 0 auto .5rem; border-radius: 6px; }
+  .qr-card p { margin: 0; font-size: .9rem; color: var(--muted); }
+
+  /* 区切り */
+  section { padding: 2.5rem 0; border-top: 1px solid var(--rule); }
+  h2 { font-size: 1.35rem; margin: 0 0 1rem; }
+  h3 { font-size: 1.05rem; margin: 0 0 .4rem; }
+
+  /* 特長 */
+  .cards { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+  @media (min-width: 640px) { .cards { grid-template-columns: repeat(3, 1fr); } }
+  .card { background: var(--card); border-radius: 14px; padding: 1.25rem; box-shadow: var(--shadow); }
+  .card p { margin: 0; font-size: .95rem; }
+  .card .icon {
+    width: 2.4rem; height: 2.4rem; border-radius: 10px; display: grid; place-items: center;
+    background: var(--soft); margin-bottom: .6rem; font-weight: 800; color: var(--accent);
+  }
+
+  /* 画面 */
+  .shots { display: flex; gap: 1rem; overflow-x: auto; padding: .5rem 2px 1rem; scroll-snap-type: x mandatory; }
+  .shots figure { margin: 0; flex: 0 0 auto; width: 200px; scroll-snap-align: start; }
+  .shots img { width: 100%; height: auto; border-radius: 14px; box-shadow: var(--shadow); background: #fff; }
+  .shots figcaption { font-size: .85rem; color: var(--muted); margin-top: .4rem; }
+
+  /* 難易度 */
+  .levels { display: grid; grid-template-columns: 1fr; gap: .5rem; margin: 0; padding: 0; list-style: none; }
+  @media (min-width: 640px) { .levels { grid-template-columns: repeat(5, 1fr); } }
+  .levels li { background: var(--card); border-radius: 12px; padding: .8rem 1rem; box-shadow: var(--shadow); }
+  .levels b { display: block; }
+  .levels span { font-size: .85rem; color: var(--muted); }
+
+  /* 解き方の一覧 */
+  .tech-group { margin: 1rem 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .chip {
+    font-size: .85rem; padding: .2rem .7rem; border-radius: 999px;
+    background: var(--card); border: 1px solid var(--rule);
+  }
+  .chip.new { border-color: var(--accent); }
+
+  /* 2列 */
+  .two { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+  @media (min-width: 760px) { .two { grid-template-columns: 1fr 1fr; } }
+
+  footer { padding: 2.5rem 0 4rem; border-top: 1px solid var(--rule); color: var(--muted); font-size: .9rem; }
+  footer ul { list-style: none; padding: 0; margin: 0 0 1rem; display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="title-row">
+        <img src="img/icon.png" alt="" width="72" height="72">
+        <div>
+          <h1>数独のお勉強</h1>
+          <p class="en">Sudoku Practice: Learn Solving</p>
+        </div>
+      </div>
+      <p class="lead">ヒントが盤面を光らせて、<br>「なぜそこに入るのか」を1行ずつ教える数独。</p>
+      <ul class="points">
+        <li>答えではなく、理由を教えるヒント</li>
+        <li>40種類以上の解き方を、図つきで説明</li>
+        <li>操作のたびに広告で待たされない</li>
+      </ul>
+      <div class="buttons">
+        <a class="btn btn-main" href="https://play.google.com/store/apps/details?id=com.karaagesoft.sudoku">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 2.5v19l10.5-9.5L4 2.5zm12.1 8L6.3 2.1l11.9 6.8-2.1 1.6zm2.1 1.5 2.3 1.3c.7.4.7 1.4 0 1.8l-2.3 1.3-2.4-2.2 2.4-2.2zm-2.1 3.4 2.1 1.6-11.9 6.8 9.8-8.4z"/></svg>
+          Google Play で入手
+        </a>
+        <a class="btn btn-sub" href="https://karaage-soft-expo-app.expo.app/">ブラウザで遊ぶ</a>
+      </div>
+      <p class="note">Android 版は無料（広告あり）。ブラウザ版はパソコンやタブレットでそのまま試せます。</p>
+    </div>
+    <div class="qr-card">
+      <img src="img/qr-play.svg" alt="Google Play のページを開く QR コード" width="180" height="180">
+      <p>スマートフォンで読み取ると<br>Google Play のページが開きます</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="wrap">
+      <h2>こんなアプリです</h2>
+      <div class="cards">
+        <div class="card">
+          <div class="icon">光</div>
+          <h3>ヒントが理由を教える</h3>
+          <p>行き詰まったらヒントボタン。盤面が光る順番と説明の行が対応しているので、目で追うだけで筋道がたどれます。読んでから「このヒントを反映する」を押せば、そのとおりに入力されます。</p>
+        </div>
+        <div class="card">
+          <div class="icon">図</div>
+          <h3>解き方を図で覚える</h3>
+          <p>N国同盟、X-ウィング、ユニークレクタングル、カラー、ALS…。どの解き方にも、本物の盤面の図つきの説明があります。図を押すと大きくなり、払って次の図へ進めます。</p>
+        </div>
+        <div class="card">
+          <div class="icon">速</div>
+          <h3>テンポよく解ける</h3>
+          <p>操作のたびに広告を見せられることはありません。メモの自動消去や、数字の入らないマスの色分けで、考えることだけに集中できます。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>画面</h2>
+      <div class="shots">
+        <figure><img src="img/01-title.png" alt="タイトル画面" loading="lazy"><figcaption>タイトル</figcaption></figure>
+        <figure><img src="img/02-hints.png" alt="ヒントで盤面が光る" loading="lazy"><figcaption>ヒントで盤面が光る</figcaption></figure>
+        <figure><img src="img/03-memo-hints.png" alt="メモを使うヒント" loading="lazy"><figcaption>メモを使うヒント</figcaption></figure>
+        <figure><img src="img/04-explain.png" alt="解き方の説明" loading="lazy"><figcaption>図つきの説明</figcaption></figure>
+        <figure><img src="img/05-tutorial.png" alt="チュートリアル" loading="lazy"><figcaption>指で見せるチュートリアル</figcaption></figure>
+        <figure><img src="img/06-daily.png" alt="今日のテスト" loading="lazy"><figcaption>今日のテスト</figcaption></figure>
+      </div>
+      <p class="note">画面は英語表示のものです。アプリは日本語を含む24言語に対応しています。</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>段が上がると、道具が増える</h2>
+      <p>難易度は5段階。ヒントのボタンも段ごとに増えるので、その段で必要な道具から1つずつ覚えられます。</p>
+      <ol class="levels">
+        <li><b>超簡単</b><span>メモなしで埋める</span></li>
+        <li><b>簡単</b><span>埋めるヒントで解く</span></li>
+        <li><b>普通</b><span>ポインティングまで</span></li>
+        <li><b>難しい</b><span>N国同盟・X-ウィングなど</span></li>
+        <li><b>超難しい</b><span>カラー・Y-ウィングなど</span></li>
+      </ol>
+      <p class="note">超簡単〜普通は最初から選べます。難しいから上は、ひとつ前の段をクリアすると開きます。</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap two">
+      <div>
+        <h2>毎日1問「今日のテスト」</h2>
+        <p>毎日、みんなと同じ1問に挑戦。翌日には点数・偏差値・順位が分かります。過去の問題はカレンダーから復習でき、100点の日はメダルに変わります。好きな時刻に通知でお知らせすることもできます。</p>
+      </div>
+      <div>
+        <h2>4本のチュートリアル</h2>
+        <p>数字を入れる・ヒントを使う・メモを使う・難しいを解く。指が動くところを見せながら進むので、読むだけで終わりません。難易度を初めて選んだときに自動で始まり、いつでも受け直せます。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>収録している解き方</h2>
+      <p>大きさや形の違いまで数えると40種類以上。どれも盤面の光り方と説明の行が1行ずつ対応しています。</p>
+      <div class="tech-group">
+        <h3>埋める</h3>
+        <div class="chips">
+          <span class="chip">単一位置（Hidden Single）</span><span class="chip">単一候補（Naked Single）</span><span class="chip">それぞれのメモ版</span>
+        </div>
+      </div>
+      <div class="tech-group">
+        <h3>候補を絞る</h3>
+        <div class="chips">
+          <span class="chip">ポインティングペア／トリプル</span><span class="chip">ボックスライン・リダクション</span>
+          <span class="chip">2国・3国・4国同盟</span><span class="chip">隠れ2国・3国同盟</span>
+          <span class="chip">ユニークレクタングル タイプ1〜6</span><span class="chip">BUG+1</span>
+        </div>
+      </div>
+      <div class="tech-group">
+        <h3>魚（行と列の組み合わせ）</h3>
+        <div class="chips">
+          <span class="chip">X-ウィング</span><span class="chip">ソードフィッシュ</span><span class="chip">ジェリーフィッシュ</span>
+          <span class="chip">フィン付き（3種）</span><span class="chip">サシミ（3種）</span><span class="chip">スカイスクレイパー</span>
+        </div>
+      </div>
+      <div class="tech-group">
+        <h3>ウィング・つながり・色</h3>
+        <div class="chips">
+          <span class="chip">Y-ウィング</span><span class="chip">XYZ-ウィング</span><span class="chip">WXYZ-ウィング</span><span class="chip">W-ウィング</span>
+          <span class="chip">2-ストリングカイト</span><span class="chip">エンプティ・レクタングル</span><span class="chip">リモートペア</span>
+          <span class="chip">X-チェーン</span><span class="chip">XY-チェーン</span><span class="chip">カラー・トラップ</span><span class="chip">カラー・ラップ</span>
+        </div>
+      </div>
+      <div class="tech-group">
+        <h3>上級</h3>
+        <div class="chips">
+          <span class="chip">ALS-XZ</span><span class="chip">スー・ド・コック</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <h2>さっそく始める</h2>
+      <div class="buttons">
+        <a class="btn btn-main" href="https://play.google.com/store/apps/details?id=com.karaagesoft.sudoku">Google Play で入手</a>
+        <a class="btn btn-sub" href="https://karaage-soft-expo-app.expo.app/">ブラウザで遊ぶ</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <ul>
+      <li><a href="privacy-policy.html">プライバシーポリシー / Privacy Policy</a></li>
+      <li><a href="../">Karaage Soft のトップ</a></li>
+      <li><a href="mailto:karaagesoft@gmail.com">お問い合わせ（karaagesoft@gmail.com）</a></li>
+    </ul>
+    <p>© Karaage Soft</p>
+  </div>
+</footer>
+
+</body>
+</html>
