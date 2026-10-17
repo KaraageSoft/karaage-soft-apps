@@ -111,12 +111,11 @@
   <div class="card">
     <h2>開くページ</h2>
     <div class="links">
-      <a class="link primary" href="https://karaage-soft-expo-app--test.expo.app/" target="_blank" rel="noopener"><b>最新のブラウザ版（テスト用）</b><span>karaage-soft-expo-app--test.expo.app</span></a>
-      <a class="link" href="https://karaage-soft-expo-app.expo.app/" target="_blank" rel="noopener"><b>公開中のブラウザ版</b><span>karaage-soft-expo-app.expo.app</span></a>
+      <a class="link primary" href="https://karaage-soft-expo-app.expo.app/" target="_blank" rel="noopener"><b>最新のブラウザ版</b><span>karaage-soft-expo-app.expo.app</span></a>
       <a class="link" href="../" target="_blank" rel="noopener"><b>紹介ページ</b><span>karaagesoft.github.io/karaage-soft-apps/sudoku/</span></a>
       <a class="link" href="https://play.google.com/store/apps/details?id=com.karaagesoft.sudoku" target="_blank" rel="noopener"><b>Google Play</b><span>内部テストの版は Play ストアのアプリから</span></a>
     </div>
-    <p class="small">テスト用は <code>npx eas-cli deploy --alias test</code> で出した版です。</p>
+    <p class="small">ブラウザ版は <code>npx eas-cli deploy --prod</code> で出した最新の版です。</p>
   </div>
 
   <div class="row filters" role="group" aria-label="絞り込み">
@@ -126,6 +125,12 @@
     <button type="button" data-filter="all">すべて</button>
   </div>
   <div id="list"></div>
+
+  <div class="card">
+    <h2>その他</h2>
+    <p class="small">上の項目にないことで気づいたこと。「結果を送る」に入ります。</p>
+    <textarea id="other" rows="5" aria-label="その他" placeholder="例：〇〇の画面で、△△すると□□になった"></textarea>
+  </div>
 </div>
 
 <script>
@@ -258,6 +263,15 @@ document.querySelectorAll('[data-filter]').forEach((b) => b.addEventListener('cl
   render();
 }));
 
+// その他（項目にない気づき）。端末の中に残す
+let other = '';
+try { other = localStorage.getItem(KEY + '/other') || ''; } catch (e) { /* その場だけ */ }
+$('#other').value = other;
+$('#other').addEventListener('input', (e) => {
+  other = e.target.value;
+  try { localStorage.setItem(KEY + '/other', other); } catch (err) { /* その場だけ */ }
+});
+
 // 結果を文にまとめる。スマホは共有（メールなど）、だめならコピー
 function report() {
   const lines = ['数独テスト台帳 ' + BUILD.version + ' / commit ' + BUILD.commit, ''];
@@ -271,6 +285,8 @@ function report() {
       if (note) lines.push('　→ ' + note.replace(/\n/g, '\n　　'));
     });
     lines.push('');
+    // その他は NG のすぐあとに
+    if (k === 'ng' && other.trim()) lines.push('■ その他', other.trim(), '');
   });
   return lines.join('\n').trim();
 }
