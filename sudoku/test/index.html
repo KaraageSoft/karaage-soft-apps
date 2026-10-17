@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<!--
+  数独のお勉強のテスト台帳（2026-10-18。ユーザーの指示）。作った人が外で、最新版を確かめるためのページ。
+  ・どこからもリンクしない。検索にも出さない（noindex）
+  ・確認項目は下の ITEMS に書く。機能を足したら書き足す。中身を大きく変えた項目は id を変える（付けた OK/NG を引き継がない）
+  ・OK/NG とメモは、開いた端末の中（localStorage）にだけ残る。「結果を送る」でまとめて共有・コピーできる
+  ・達人・裏面・免許皆伝・卒業証書のことは書かない（公開のページなので）
+-->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>数独テスト台帳</title>
+<link rel="icon" href="../img/icon.png">
+<style>
+  :root {
+    --bg: #fbf9f3;
+    --card: #ffffff;
+    --fg: #2c2a24;
+    --muted: #6a6555;
+    --rule: #ddd8c8;
+    --link: #2f6b4f;
+    --accent: #2e7d32;
+    --accent-fg: #ffffff;
+    --chip: #eef0e6;
+    --ok: #2e7d32;
+    --ok-bg: #e4f2e4;
+    --ng: #b3392f;
+    --ng-bg: #f8e3e0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1b18; --card: #26251f; --fg: #ece8dd; --muted: #a09a89; --rule: #3a382f; --link: #86c7a4;
+      --accent: #4caf50; --accent-fg: #0f1a10; --chip: #302f27; --ok: #7fcf87; --ok-bg: #22361f; --ng: #f08a7f; --ng-bg: #3e2320;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1b18; --card: #26251f; --fg: #ece8dd; --muted: #a09a89; --rule: #3a382f; --link: #86c7a4;
+    --accent: #4caf50; --accent-fg: #0f1a10; --chip: #302f27; --ok: #7fcf87; --ok-bg: #22361f; --ng: #f08a7f; --ng-bg: #3e2320;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Hiragino Sans", "Noto Sans JP", "Yu Gothic", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    padding: 20px max(16px, env(safe-area-inset-right)) 48px max(16px, env(safe-area-inset-left));
+  }
+  .wrap { max-width: 44rem; margin: 0 auto; display: grid; gap: 18px; }
+  h1 { font-size: 1.4rem; margin: 0; line-height: 1.3; }
+  h2 { font-size: .95rem; margin: 0 0 8px; color: var(--muted); }
+  a { color: var(--link); }
+  .card { background: var(--card); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 16px; display: grid; gap: 10px; }
+  .build { margin: 0; font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .links { display: grid; gap: 8px; }
+  .link { display: grid; padding: 10px 12px; border-radius: 10px; text-decoration: none; background: var(--chip); color: var(--fg); }
+  .link.primary { background: var(--accent); color: var(--accent-fg); }
+  .link b { font-size: 1rem; }
+  .link span { font-size: .8rem; opacity: .85; word-break: break-all; }
+  .progress { display: flex; gap: 14px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+  .bar { height: 8px; border-radius: 999px; background: var(--chip); overflow: hidden; display: flex; }
+  .bar i { display: block; height: 100%; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  button {
+    font: inherit; font-size: .9rem; border: 1px solid var(--rule); background: var(--card); color: var(--fg);
+    border-radius: 999px; padding: 6px 14px; cursor: pointer; min-height: 40px;
+  }
+  button.main { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .filters button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .group { display: grid; gap: 10px; }
+  .item { background: var(--card); border: 1px solid var(--rule); border-left-width: 6px; border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; }
+  .item[data-status="ok"] { border-left-color: var(--ok); }
+  .item[data-status="ng"] { border-left-color: var(--ng); }
+  .head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .title { font-weight: 700; flex: 1 1 14rem; }
+  .chip { font-size: .75rem; padding: 1px 8px; border-radius: 999px; background: var(--chip); color: var(--muted); white-space: nowrap; }
+  .how { margin: 0; font-size: .92rem; }
+  .status button[data-v="ok"][aria-pressed="true"] { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); font-weight: 700; }
+  .status button[data-v="ng"][aria-pressed="true"] { background: var(--ng-bg); border-color: var(--ng); color: var(--ng); font-weight: 700; }
+  .status button[data-v="todo"][aria-pressed="true"] { background: var(--chip); font-weight: 700; }
+  .when { font-size: .75rem; color: var(--muted); margin-left: auto; }
+  textarea {
+    width: 100%; min-height: 2.6rem; resize: vertical; font: inherit; font-size: .92rem; color: var(--fg);
+    background: var(--bg); border: 1px solid var(--rule); border-radius: 8px; padding: 6px 8px;
+  }
+  .empty { border: 1px dashed var(--rule); border-radius: 12px; padding: 18px; color: var(--muted); }
+  .small { font-size: .8rem; color: var(--muted); margin: 0; }
+  code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .85em; background: var(--chip); padding: 1px 5px; border-radius: 4px; word-break: break-all; }
+  .toast { min-height: 1.4em; font-size: .85rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>数独テスト台帳</h1>
+    <p class="build" id="build"></p>
+    <div class="progress" id="progress"></div>
+    <div class="bar" id="bar" aria-hidden="true"></div>
+    <div class="row">
+      <button type="button" class="main" id="send">結果を送る</button>
+      <span class="toast" id="toast" role="status"></span>
+    </div>
+    <p class="small">OK・NG とメモは、この端末の中だけに残ります。「結果を送る」で、メールなどに貼れる文にまとめます。</p>
+  </div>
+
+  <div class="card">
+    <h2>開くページ</h2>
+    <div class="links">
+      <a class="link primary" href="https://karaage-soft-expo-app--test.expo.app/" target="_blank" rel="noopener"><b>最新のブラウザ版（テスト用）</b><span>karaage-soft-expo-app--test.expo.app</span></a>
+      <a class="link" href="https://karaage-soft-expo-app.expo.app/" target="_blank" rel="noopener"><b>公開中のブラウザ版</b><span>karaage-soft-expo-app.expo.app</span></a>
+      <a class="link" href="../" target="_blank" rel="noopener"><b>紹介ページ</b><span>karaagesoft.github.io/karaage-soft-apps/sudoku/</span></a>
+      <a class="link" href="https://play.google.com/store/apps/details?id=com.karaagesoft.sudoku" target="_blank" rel="noopener"><b>Google Play</b><span>内部テストの版は Play ストアのアプリから</span></a>
+    </div>
+    <p class="small">テスト用は <code>npx eas-cli deploy --alias test</code> で出した版です。</p>
+  </div>
+
+  <div class="row filters" role="group" aria-label="絞り込み">
+    <button type="button" data-filter="todo">未確認</button>
+    <button type="button" data-filter="ng">NG</button>
+    <button type="button" data-filter="ok">OK</button>
+    <button type="button" data-filter="all">すべて</button>
+  </div>
+  <div id="list"></div>
+</div>
+
+<script>
+// 確かめる版
+const BUILD = { version: '1.0.2（作業中）', commit: '3b3d018', updated: '2026-10-18' };
+
+// 確認項目。env は device（実機）・web（ブラウザ）・both
+const ITEMS = [
+  { id: 'fig-swipe', area: '大きい図（ヒントの説明）', env: 'both', title: '払って、となりの図・前後の段落へ移る',
+    how: '説明の図を押して大きくする → 左右に払うと横に並んだ図へ、上下に払うと前後の段落へ移る。図のない段落は文字だけで出る。' },
+  { id: 'fig-arrows', area: '大きい図（ヒントの説明）', env: 'both', title: '︿ ﹀ ‹ › を押しても移れる',
+    how: '大きくなった印を押すと、その向きへ移る。印のないところを押すと閉じる。行けない向きの印は出ない。' },
+  { id: 'fig-pinch', area: '大きい図（ヒントの説明）', env: 'device', title: '二本指で広げて拡大（iPhone・Android）',
+    how: '指の下の場所が広がる。指を動かすと図が同じ向きに動く。離すと元の大きさに戻る。' },
+  { id: 'fig-scroll', area: '大きい図（ヒントの説明）', env: 'device', title: '長い説明が最後までスクロールできる（特に iPhone）',
+    how: '3国同盟など長い段落で、文を上へ動かして最後の行まで読める。盤面の大きさは変わらない。いちばん下でもう一度払うと次の段落へ。' },
+  { id: 'fig-close', area: '大きい図（ヒントの説明）', env: 'both', title: '閉じると、裏の説明がその段落まで動いている',
+    how: '大きい図で何段落か進めてから閉じる → 後ろの説明欄が、見ていた段落の位置にある。' },
+  { id: 'glow-tint', area: 'ヒントの光り方', env: 'both', title: 'ヒントのある数字ボタンに、いつでも薄い色',
+    how: '明滅はしない。緑＝埋めるヒント、青＝消すヒント。ヒントボタンが光っているときも色が付いたまま。' },
+  { id: 'glow-digit', area: 'ヒントの光り方', env: 'both', title: '「このマスにこの数字」の点滅のあとに数字が大きくなる',
+    how: '点滅が終わってから数字が出る順になっている。' },
+  { id: 'glow-eraser', area: 'ヒントの光り方', env: 'both', title: '反映で消したメモの□の枠は、消しゴムが通ったあとに出る',
+    how: '消すヒントを反映 → 消しゴムが通り終わってから□の枠が付く。' },
+  { id: 'ex-sashimi', area: '解法の説明', env: 'both', title: 'サシミ：題名・名前の説明・図',
+    how: 'ヒレ付きのサシミの盤面で、題名に「サシミ」が付いた名前が出る。名前の由来の一言と、並んだ2枚の図がある。' },
+  { id: 'ex-names', area: '解法の説明', env: 'both', title: '2国同盟・3国同盟などの名前と、名前の由来',
+    how: 'N国同盟・隠れN国同盟・ポインティング・ユニークレクタングルなど、大きさの付く解法で、題名と由来の一言が出る。' },
+  { id: 'ex-fullhouse', area: '解法の説明', env: 'both', title: 'フルハウスは「別の呼び名」として出る',
+    how: '単一候補（メモ版）の説明の中に、別の呼び名として書かれている。解法の数には入れない。' },
+  { id: 'ex-figures', area: '解法の説明', env: 'both', title: '新しい図：カラートラップ・カラーラップ・3つ組・ERの形',
+    how: 'カラートラップの座標入りの文、カラーラップ（3マス以上決まる図）、N国同盟・隠れの3つ組（12/23/13）、エンプティレクタングルの形の違いの図。' },
+  { id: 'ex-er-reverse', area: '解法の説明', env: 'both', title: 'ERの「両方消せる」番で E8 の行と光り方',
+    how: '逆の場合の一文が出て、E8 の光り方が文と合っている。' },
+  { id: 'ex-wxyz', area: '解法の説明', env: 'both', title: 'WXYZ-ウィングの「対象のマス」の言い方',
+    how: '最初に4マスを「対象のマス」と決めてから話が進む。' },
+  { id: 'ex-hidden-single', area: '解法の説明', env: 'both', title: '単一位置（メモなし）の列・行の直し',
+    how: 'ブロックに同じ数字がある場合を正しく見て、単一位置でないマスを単一位置と言わない。' },
+  { id: 'ui-settings', area: '画面', env: 'both', title: '設定のボタンの文字が上下の真ん中',
+    how: '日本語のほか、文字の長い言語（ドイツ語など）でも真ん中にある。' },
+  { id: 'ui-site-link', area: '画面', env: 'web', title: 'ブラウザ版のタイトル画面の左下に、紹介ページへのリンク',
+    how: '押すと新しいタブで紹介ページが開く。アプリ版には出ない。' },
+  { id: 'rel-store', area: '1.0.2 を出す前', env: 'both', title: 'ストアの説明（24言語）を「薄い色が付く」に',
+    how: 'Google Play Console の説明文で、数字ボタンの一文を明滅から薄い色に直したか。リリースノートも24言語。' },
+];
+
+const ENV_LABEL = { device: '実機', web: 'ブラウザ', both: '実機・ブラウザ' };
+const STATUS_LABEL = { todo: '未確認', ok: 'OK', ng: 'NG' };
+const KEY = 'sudoku-test-notebook/v1';
+const $ = (s) => document.querySelector(s);
+
+// 端末の中の記録 { [id]: { status, note, at } }。読めない端末でも、その場では動く
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { saved = {}; }
+let filter = 'todo';
+try { filter = localStorage.getItem(KEY + '/filter') || 'todo'; } catch (e) { /* その場だけ */ }
+const store = () => { try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) { /* その場だけ */ } };
+const rec = (id) => saved[id] || { status: 'todo', note: '' };
+
+$('#build').textContent = [BUILD.version, 'commit ' + BUILD.commit, '更新 ' + BUILD.updated].join(' ・ ');
+
+function fmt(ms) {
+  const d = new Date(ms);
+  return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
+function renderProgress() {
+  const c = { todo: 0, ok: 0, ng: 0 };
+  ITEMS.forEach((it) => { c[rec(it.id).status]++; });
+  const p = $('#progress'); p.innerHTML = '';
+  ['todo', 'ok', 'ng'].forEach((k) => {
+    const s = document.createElement('span'); s.textContent = STATUS_LABEL[k] + ' ';
+    const b = document.createElement('b'); b.textContent = c[k]; s.appendChild(b); p.appendChild(s);
+  });
+  const bar = $('#bar'); bar.innerHTML = '';
+  [['ok', 'var(--ok)'], ['ng', 'var(--ng)']].forEach(([k, color]) => {
+    const i = document.createElement('i'); i.style.width = (c[k] / ITEMS.length * 100) + '%'; i.style.background = color; bar.appendChild(i);
+  });
+}
+
+function setStatus(id, status) {
+  saved[id] = Object.assign({}, rec(id), { status, at: status === 'todo' ? null : Date.now() });
+  store(); render();
+}
+
+function render() {
+  renderProgress();
+  document.querySelectorAll('[data-filter]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === filter)));
+  const list = $('#list'); list.innerHTML = '';
+  const shown = ITEMS.filter((it) => filter === 'all' || rec(it.id).status === filter);
+  if (!shown.length) {
+    const e = document.createElement('div'); e.className = 'empty';
+    e.textContent = filter === 'todo' ? '未確認の項目はありません。おつかれさまでした。' : STATUS_LABEL[filter] + 'の項目はありません。';
+    list.appendChild(e); return;
+  }
+  const groups = new Map();
+  shown.forEach((it) => { if (!groups.has(it.area)) groups.set(it.area, []); groups.get(it.area).push(it); });
+  const box = document.createElement('div'); box.className = 'group';
+  groups.forEach((arr, name) => {
+    const h = document.createElement('h2'); h.textContent = name + '（' + arr.length + '）'; box.appendChild(h);
+    arr.forEach((it) => {
+      const r = rec(it.id);
+      const card = document.createElement('article'); card.className = 'item'; card.dataset.status = r.status;
+      const head = document.createElement('div'); head.className = 'head';
+      const t = document.createElement('div'); t.className = 'title'; t.textContent = it.title; head.appendChild(t);
+      const c = document.createElement('span'); c.className = 'chip'; c.textContent = ENV_LABEL[it.env]; head.appendChild(c);
+      card.appendChild(head);
+      const p = document.createElement('p'); p.className = 'how'; p.textContent = it.how; card.appendChild(p);
+      const st = document.createElement('div'); st.className = 'row status';
+      ['ok', 'ng', 'todo'].forEach((v) => {
+        const b = document.createElement('button'); b.type = 'button'; b.dataset.v = v; b.textContent = STATUS_LABEL[v];
+        b.setAttribute('aria-pressed', String(r.status === v));
+        b.addEventListener('click', () => setStatus(it.id, v)); st.appendChild(b);
+      });
+      if (r.at && r.status !== 'todo') { const w = document.createElement('span'); w.className = 'when'; w.textContent = fmt(r.at); st.appendChild(w); }
+      card.appendChild(st);
+      const ta = document.createElement('textarea'); ta.placeholder = '気づいたこと（任意）'; ta.value = r.note || '';
+      ta.setAttribute('aria-label', it.title + 'のメモ');
+      ta.addEventListener('input', () => { saved[it.id] = Object.assign({}, rec(it.id), { note: ta.value }); store(); });
+      card.appendChild(ta);
+      box.appendChild(card);
+    });
+  });
+  list.appendChild(box);
+}
+
+document.querySelectorAll('[data-filter]').forEach((b) => b.addEventListener('click', () => {
+  filter = b.dataset.filter;
+  try { localStorage.setItem(KEY + '/filter', filter); } catch (e) { /* その場だけ */ }
+  render();
+}));
+
+// 結果を文にまとめる。スマホは共有（メールなど）、だめならコピー
+function report() {
+  const lines = ['数独テスト台帳 ' + BUILD.version + ' / commit ' + BUILD.commit, ''];
+  ['ng', 'ok', 'todo'].forEach((k) => {
+    const arr = ITEMS.filter((it) => rec(it.id).status === k);
+    if (!arr.length) return;
+    lines.push('■ ' + STATUS_LABEL[k] + '（' + arr.length + '）');
+    arr.forEach((it) => {
+      lines.push('・' + it.title);
+      const note = (rec(it.id).note || '').trim();
+      if (note) lines.push('　→ ' + note.replace(/\n/g, '\n　　'));
+    });
+    lines.push('');
+  });
+  return lines.join('\n').trim();
+}
+const toast = (s) => { $('#toast').textContent = s; setTimeout(() => { $('#toast').textContent = ''; }, 2500); };
+$('#send').addEventListener('click', async () => {
+  const text = report();
+  if (navigator.share) {
+    try { await navigator.share({ title: '数独テストの結果', text }); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  try { await navigator.clipboard.writeText(text); toast('コピーしました。メールに貼ってください。'); }
+  catch (e) { toast('コピーできませんでした。'); }
+});
+
+render();
+</script>
+</body>
+</html>
