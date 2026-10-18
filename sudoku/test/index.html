@@ -3,7 +3,7 @@
   数独のお勉強のテスト台帳（2026-10-18。ユーザーの指示）。作った人が外で、最新版を確かめるためのページ。
   ・どこからもリンクしない。検索にも出さない（noindex）
   ・確認項目は下の ITEMS に書く。機能を足したら書き足す。中身を大きく変えた項目は id を変える（付けた OK/NG を引き継がない）
-  ・OK/NG とメモは、開いた端末の中（localStorage）にだけ残る。「結果を送る」でまとめて共有・コピーできる
+  ・OK/NG とメモは、開いた端末の中（localStorage）にだけ残る。「メールで送る」で宛先・件名・本文が入ったメールを開く（2026-10-18）。コピーもできる
   ・達人・裏面・免許皆伝・卒業証書のことは書かない（公開のページなので）
 -->
 <html lang="ja">
@@ -102,10 +102,11 @@
     <div class="progress" id="progress"></div>
     <div class="bar" id="bar" aria-hidden="true"></div>
     <div class="row">
-      <button type="button" class="main" id="send">結果を送る</button>
+      <button type="button" class="main" id="send">メールで送る</button>
+      <button type="button" id="copy">コピー</button>
       <span class="toast" id="toast" role="status"></span>
     </div>
-    <p class="small">OK・NG とメモは、この端末の中だけに残ります。「結果を送る」で、メールなどに貼れる文にまとめます。</p>
+    <p class="small">OK・NG とメモは、この端末の中だけに残ります。「メールで送る」で、宛先と件名が入ったメールが開きます。</p>
   </div>
 
   <div class="card">
@@ -128,14 +129,14 @@
 
   <div class="card">
     <h2>その他</h2>
-    <p class="small">上の項目にないことで気づいたこと。「結果を送る」に入ります。</p>
+    <p class="small">上の項目にないことで気づいたこと。送るメールに入ります。</p>
     <textarea id="other" rows="5" aria-label="その他" placeholder="例：〇〇の画面で、△△すると□□になった"></textarea>
   </div>
 </div>
 
 <script>
 // 確かめる版
-const BUILD = { version: '1.0.2（作業中）', commit: '345117f', updated: '2026-10-18' };
+const BUILD = { version: '1.0.2（作業中）', commit: '99ddfa5', updated: '2026-10-18' };
 
 // 確認項目。env は device（実機）・web（ブラウザ）・both
 const ITEMS = [
@@ -159,14 +160,14 @@ const ITEMS = [
     how: 'ヒレ付きのサシミの盤面で、題名に「サシミ」が付いた名前が出る。名前の由来の一言と、並んだ2枚の図がある。' },
   { id: 'ex-names', area: '解法の説明', env: 'both', title: '2国同盟・3国同盟などの名前と、名前の由来',
     how: 'N国同盟・隠れN国同盟・ポインティング・ユニークレクタングルなど、大きさの付く解法で、題名と由来の一言が出る。' },
-  { id: 'ex-fullhouse', area: '解法の説明', env: 'both', title: 'フルハウスは「別の呼び名」として出る',
-    how: '単一候補（メモ版）の説明の中に、別の呼び名として書かれている。解法の数には入れない。' },
+  { id: 'ex-fullhouse-2', area: '解法の説明', env: 'both', title: 'フルハウスは「別の呼び名」として出る（場所を書き直した）',
+    how: '「単一位置」と「単一位置（メモ）」の説明（📖）の5段落目「エリアの空きが1マスだけのときは…」に、別の呼び名として書かれている。前の項目で「単一候補（メモ版）」と書いたのは間違いでした。ブラウザ版は 10/16 以降に出したもので確かめる。' },
   { id: 'ex-figures', area: '解法の説明', env: 'both', title: '新しい図：カラートラップ・カラーラップ・3つ組・ERの形',
     how: 'カラートラップの座標入りの文、カラーラップ（3マス以上決まる図）、N国同盟・隠れの3つ組（12/23/13）、エンプティレクタングルの形の違いの図。' },
   { id: 'ex-er-reverse', area: '解法の説明', env: 'both', title: 'ERの「両方消せる」番で E8 の行と光り方',
     how: '逆の場合の一文が出て、E8 の光り方が文と合っている。' },
-  { id: 'ex-wxyz', area: '解法の説明', env: 'both', title: 'WXYZ-ウィングの「対象のマス」の言い方',
-    how: '最初に4マスを「対象のマス」と決めてから話が進む。' },
+  { id: 'ex-wxyz-scope', area: '解法の説明', env: 'both', title: 'WXYZ-ウィング：対象のマスを選ぶ範囲と理由',
+    how: '解法の文の1行目に「4つのマスを〇〇ブロックと、そこを通る〇行（列）の中から選ぶ。どちらの中でもマスどうしは互いに見えるので…」が出て、盤面ではまずブロックと行（列）が囲まれる。説明（📖）にも、どこから選んでもよいわけではない理由の段落がある（日本語・英語）。最初の図にブロックと行の囲み。' },
   { id: 'ex-hidden-single', area: '解法の説明', env: 'both', title: '単一位置（メモなし）の列・行の直し',
     how: 'ブロックに同じ数字がある場合を正しく見て、単一位置でないマスを単一位置と言わない。' },
   { id: 'ui-settings', area: '画面', env: 'both', title: '設定のボタンの文字が上下の真ん中',
@@ -183,6 +184,14 @@ const ITEMS = [
     how: '達人の段の終盤など、2択のマスが多い場面で続けて入力しても引っかからない。数字ボタンの薄い色（緑・青）は前と同じ数字に付く。手が無いときは「その他」が赤くなる（間違いがあるときはチェックが点滅）。' },
   { id: 'xy-chain', area: 'ヒントの点検で直したもの（10/18）', env: 'both', title: 'XY-チェーン：前と同じ鎖が出る',
     how: '探し方を速くしたが、出る鎖は前と同じ（いちばん短いもの）。光り方・図も前と同じ。' },
+  { id: 'wrap-short', area: 'テストの結果から直したもの（10/18）', env: 'both', title: 'カラー・ラップ：いちばん短いぶつかり方だけを出す',
+    how: '同じ色がぶつかる2マスを、強いつながりだけでつなぐいちばん短い鎖を見せ、決まるのはその鎖の上のマスだけ（例：Ｂ１－Ｆ１－Ｆ９－Ｄ８－Ｂ８ならＦ１・Ｄ８）。光る数字は前と同じ。' },
+  { id: 'fig-bigger', area: 'テストの結果から直したもの（10/18）', env: 'both', title: '大きい図の盤面を大きく（パソコン・タブレット）',
+    how: '盤面の上限を560から760に。パソコンやタブレットのブラウザでは、画面の高さが許すところまで大きくなる。スマホは前から幅いっぱい（左右の‹ ›と7割ほど重なる）で変わらない。スマホでまだ小さく見えるなら、その画面を送ってください。' },
+  { id: 'fig-scrollbar', area: 'テストの結果から直したもの（10/18）', env: 'both', title: '大きい図の長い説明：続きがある側が暗く、スクロールバーが出る',
+    how: '文が枠に収まらないとき、下に続きがあれば下の端、上に戻れれば上の端が暗くなる。右端にスクロールバー（溝とつまみ）。前の細いつまみは枠の外にはみ出して見えていなかった。' },
+  { id: 'debug-picker', area: 'テストの結果から直したもの（10/18）', env: 'both', title: 'デバッグの「問題」長押しに、全部の解法と種類',
+    how: '埋めるヒント4つ・ブロックで塞ぐ単一位置・UR タイプ2/5・3国/4国同盟・隠れ3国/4国同盟・サシミ・両方にフィン・カイトの2形・X-チェーン4本が並ぶ。選ぶ数字はコードの注釈に。' },
   { id: 'rel-store', area: '1.0.2 を出す前', env: 'both', title: 'ストアの説明（24言語）を「薄い色が付く」に',
     how: 'Google Play Console の説明文で、数字ボタンの一文を明滅から薄い色に直したか。リリースノートも24言語。' },
 ];
@@ -282,7 +291,7 @@ $('#other').addEventListener('input', (e) => {
   try { localStorage.setItem(KEY + '/other', other); } catch (err) { /* その場だけ */ }
 });
 
-// 結果を文にまとめる。スマホは共有（メールなど）、だめならコピー
+// 結果を文にまとめる。「メールで送る」は宛先・件名・本文が入ったメールを開く（2026-10-18。ユーザーの指示）
 function report() {
   const lines = ['数独テスト台帳 ' + BUILD.version + ' / commit ' + BUILD.commit, ''];
   ['ng', 'ok', 'todo'].forEach((k) => {
@@ -301,13 +310,13 @@ function report() {
   return lines.join('\n').trim();
 }
 const toast = (s) => { $('#toast').textContent = s; setTimeout(() => { $('#toast').textContent = ''; }, 2500); };
-$('#send').addEventListener('click', async () => {
-  const text = report();
-  if (navigator.share) {
-    try { await navigator.share({ title: '数独テストの結果', text }); return; }
-    catch (e) { if (e && e.name === 'AbortError') return; }
-  }
-  try { await navigator.clipboard.writeText(text); toast('コピーしました。メールに貼ってください。'); }
+const MAIL_TO = 'karaagesoft@gmail.com';
+$('#send').addEventListener('click', () => {
+  const subject = '数独テスト台帳の結果（' + BUILD.version + ' / ' + BUILD.commit + '）';
+  location.href = 'mailto:' + MAIL_TO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(report());
+});
+$('#copy').addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(report()); toast('コピーしました。'); }
   catch (e) { toast('コピーできませんでした。'); }
 });
 
