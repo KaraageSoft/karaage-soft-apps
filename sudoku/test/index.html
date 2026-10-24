@@ -136,10 +136,12 @@
 
 <script>
 // 確かめる版
-const BUILD = { version: '1.0.2（versionCode 20・内部テスト）', commit: '246bab6', updated: '2026-10-25' };
+const BUILD = { version: '1.0.2（versionCode 20・内部テスト）', commit: 'de7170c', updated: '2026-10-25' };
 
 // 確認項目。env は device（実機）・web（ブラウザ）・both
 const ITEMS = [
+  { id: 'g-gaps', area: '全体（SDK 58・画面）', env: 'both', title: 'どのヒントの解法の文も、まとまりごとに小さな隙間がある（結論の前は必ず）',
+    how: '形を見る段と、場合分け・理由の段の間に隙間。結論（「よって…消せます」「確定です」）の前にも隙間。各ヒントの「文の1行ずつと光る段」を見るときに一緒に見る。' },
   { id: 'g-debug-digit', area: '全体（SDK 58・画面）', env: 'both', title: 'デバッグの「問題」長押しで開いた盤面は、話題の数字が1になっていて、1が選ばれている',
     how: 'どの解き方でも、1を押せばそのヒントが光る。' },
   { id: 'hs-text', area: '単一位置（Hidden Single）', env: 'both', title: '文の1行ずつと光る段が合っている',
