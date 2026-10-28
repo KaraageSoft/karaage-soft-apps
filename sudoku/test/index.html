@@ -136,7 +136,7 @@
 
 <script>
 // 確かめる版
-const BUILD = { version: '1.0.2（versionCode 20・内部テスト）', commit: 'ff6a577', updated: '2026-10-29' };
+const BUILD = { version: '1.0.2（versionCode 20・内部テスト）', commit: '6d3fa76', updated: '2026-10-29' };
 
 // 確認項目。env は device（実機）・web（ブラウザ）・both
 const ITEMS = [
@@ -148,6 +148,8 @@ const ITEMS = [
     how: 'W-ウィング・XY-ウィング・リモートペア・ALS など。📖の図の白い縁も太くした。' },
   { id: 'g-either-black', area: '全体', env: 'both', title: '「このどれか」のメモが点滅のあとに大きくなって水色になるとき、縁が白から黒に少しずつ変わる',
     how: '光っているだけのとき（青字）は白い縁のまま。ALS の「Ｆ４に8が入らない場合」のＡ４・Ｂ４の3など。' },
+  { id: 'g-either-pulse', area: '全体', env: 'both', title: '「このどれか」のメモが、大きくなる前に、マスの点滅と同じ拍で字も白く大きく点滅する（4回）。そのあと大きくなって、そのまま残る',
+    how: 'ALS の「Ｆ４に8が入らない場合」のＡ４・Ｂ４の3、フィンが2マス以上のフィン付きX-ウィングのフィンなど。' },
   { id: 'als-book-two-ways', area: 'ALS-XZ（ほぼロック集合）', env: 'both', title: '📖：2段目に「つながり方は2通りあります。つなぐ数字のマスが同じ行か列に並ぶ形と、同じブロックに入る形です。」',
     how: 'ほかの言語も同じ一文。' },
   { id: 'sdc-box', area: 'スー・ド・コック', env: 'both', title: 'ブロック側のマス',
