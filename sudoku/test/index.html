@@ -3,6 +3,7 @@
   数独のお勉強のテスト台帳（2026-10-18。ユーザーの指示）。作った人が外で、最新版を確かめるためのページ。
   ・どこからもリンクしない。検索にも出さない（noindex）
   ・確認項目は下の ITEMS に書く。機能を足したら書き足す。中身を大きく変えた項目は id を変える（付けた OK/NG を引き継がない）
+  ・確かめる端末（Android／iPhone）を上で切り替える。OK/NG・メモ・その他は端末ごとに分けて残し、メールの件名と本文にも端末が入る（2026-11-01）
   ・OK/NG とメモは、開いた端末の中（localStorage）にだけ残る。「メールで送る」で宛先・件名・本文が入ったメールを開く（2026-10-18）。コピーもできる
   ・発表していない機能のことは書かない。このコメントにも名前を書かない（公開のページで、ソースは誰でも読めるので。どれのことかは手元のメモにある）
 -->
@@ -71,6 +72,7 @@
     border-radius: 999px; padding: 6px 14px; cursor: pointer; min-height: 40px;
   }
   button.main { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .os button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
   .filters button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
   .group { display: grid; gap: 10px; }
   .item { background: var(--card); border: 1px solid var(--rule); border-left-width: 6px; border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; }
@@ -99,6 +101,12 @@
   <div class="card">
     <h1>数独テスト台帳</h1>
     <p class="build" id="build"></p>
+    <div class="row os" role="group" aria-label="確かめる端末">
+      <span class="small">確かめる端末</span>
+      <button type="button" data-os="android">Android</button>
+      <button type="button" data-os="ios">iPhone</button>
+    </div>
+    <p class="small" id="osNote" hidden></p>
     <div class="progress" id="progress"></div>
     <div class="bar" id="bar" aria-hidden="true"></div>
     <div class="row">
@@ -106,7 +114,7 @@
       <button type="button" id="copy">コピー</button>
       <span class="toast" id="toast" role="status"></span>
     </div>
-    <p class="small">OK・NG とメモは、この端末の中だけに残ります。「メールで送る」で、宛先と件名が入ったメールが開きます。</p>
+    <p class="small">OK・NG とメモは、この端末の中に、Android と iPhone で分けて残ります。「メールで送る」で、宛先と件名が入ったメールが開きます。</p>
   </div>
 
   <div class="card">
@@ -115,6 +123,7 @@
       <a class="link primary" href="https://karaage-soft-expo-app.expo.app/" target="_blank" rel="noopener"><b>最新のブラウザ版</b><span>karaage-soft-expo-app.expo.app</span></a>
       <a class="link" href="../" target="_blank" rel="noopener"><b>紹介ページ</b><span>karaagesoft.github.io/karaage-soft-apps/sudoku/</span></a>
       <a class="link" href="https://play.google.com/store/apps/details?id=com.karaagesoft.sudoku" target="_blank" rel="noopener"><b>Google Play</b><span>内部テストの版は Play ストアのアプリから</span></a>
+      <div class="link"><b>iPhone（TestFlight）</b><span>準備中。できたら TestFlight のアプリから入れます</span></div>
     </div>
     <p class="small">ブラウザ版は <code>npx eas-cli deploy --prod</code> で出した最新の版です。</p>
   </div>
@@ -137,8 +146,10 @@
 <script>
 // 確かめる版
 const BUILD = { version: '1.0.2（versionCode 20・内部テスト）', commit: 'c6532eb', updated: '2026-11-01' };
+// iPhone の版（TestFlight）。できるまでは null で、iPhone ではブラウザ版で確かめる（2026-11-01）
+const BUILD_IOS = null;
 
-// 確認項目。env は device（実機）・web（ブラウザ）・both
+// 確認項目。env は device（実機）・web（ブラウザ）・both。os を 'android' か 'ios' にすると、その端末だけに出す
 const ITEMS = [
   { id: 'als-sets-xz', area: 'ALS-XZ（ほぼロック集合）', env: 'both', title: 'ヒントの文の最初に「①：〇行の〇・〇は〇・〇・〇で、あと一歩で埋まる組です。」「②：…」の2行。光り方は、その組のマスが青・組の数字が緑（大きくならない）・組の並びの囲み',
     how: 'デバッグの ALS の見本などで見る。場合の文は「Ｆ１に4が入らない場合、①のＢ１・Ｆ１から4が抜けて1・9で埋まるので、…」の形になり、場合の段でその組の並びも囲む。' },
@@ -162,6 +173,8 @@ const ITEMS = [
     how: '本筋は「１行の組を①、４行の組を②とします」から。場合の段は「①から4が抜けるので」。スー・ド・コックの図2枚にも①②の印。' },
   { id: 'tr-1101', area: '翻訳', env: 'both', title: '言語を English 以外（例：Deutsch・中文）にすると、ALS-XZ の📖とヒントの文（組が3つの形・①②③の組・リモートペアを1マスずつたどる文）が、英語ではなくその言語で出る',
     how: '設定の言語を切り替え、デバッグの ALS・ALS-XY-Wing・Remote Pairs の見本でヒントを出し、📖も開く。言い回しの細かい所はネイティブに見てもらうとして、英語の文が混ざっていないかだけ見る。' },
+  { id: 'ios-web-1101', area: 'iPhone', env: 'web', os: 'ios', title: 'iPhone SE の Safari で最新のブラウザ版を開くと、タイトル画面と盤面が画面に収まり、数字の入力・メモ・ヒントがふつうに使える',
+    how: 'アプリの準備のあいだに、iPhone での見え方を先に見ておく。最初にどこかを押したあと、効果音と BGM が鳴るかも見る。' },
 ];
 
 const ENV_LABEL = { device: '実機', web: 'ブラウザ', both: '実機・ブラウザ' };
@@ -169,15 +182,37 @@ const STATUS_LABEL = { todo: '未確認', ok: 'OK', ng: 'NG' };
 const KEY = 'sudoku-test-notebook/v1';
 const $ = (s) => document.querySelector(s);
 
-// 端末の中の記録 { [id]: { status, note, at } }。読めない端末でも、その場では動く
+// 確かめる端末（2026-11-01。iPhone でも確かめる）。最初は開いた端末から決め、上のボタンで切り替えられる
+const OS_LABEL = { android: 'Android', ios: 'iPhone' };
+let os = /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'ios' : 'android';
+try { os = localStorage.getItem(KEY + '/os') || os; } catch (e) { /* その場だけ */ }
+// 記録は端末ごとに分けて置く。Android はこれまでの置き場所のまま（付けた OK/NG を引き継ぐ）
+const keyOf = (name) => KEY + (os === 'ios' ? '/ios' : '') + (name ? '/' + name : '');
+// その端末で出す項目（os を付けた項目は、その端末だけ）
+const items = () => ITEMS.filter((it) => !it.os || it.os === os);
+const build = () => (os === 'ios' ? BUILD_IOS : BUILD);
+
+// 端末の中の記録 { [id]: { status, note, at } } と、その他の気づき。読めない端末でも、その場では動く
 let saved = {};
-try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { saved = {}; }
+let other = '';
+function load() {
+  try { saved = JSON.parse(localStorage.getItem(keyOf('')) || '{}') || {}; } catch (e) { saved = {}; }
+  try { other = localStorage.getItem(keyOf('other')) || ''; } catch (e) { other = ''; }
+}
+load();
 let filter = 'todo';
 try { filter = localStorage.getItem(KEY + '/filter') || 'todo'; } catch (e) { /* その場だけ */ }
-const store = () => { try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) { /* その場だけ */ } };
+const store = () => { try { localStorage.setItem(keyOf(''), JSON.stringify(saved)); } catch (e) { /* その場だけ */ } };
 const rec = (id) => saved[id] || { status: 'todo', note: '' };
 
-$('#build').textContent = [BUILD.version, 'commit ' + BUILD.commit, '更新 ' + BUILD.updated].join(' ・ ');
+function renderBuild() {
+  const b = build();
+  $('#build').textContent = b ? [b.version, 'commit ' + b.commit, '更新 ' + b.updated].join(' ・ ') : 'iPhone のアプリは準備中';
+  document.querySelectorAll('[data-os]').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.os === os)));
+  const note = $('#osNote');
+  note.hidden = !(os === 'ios' && !BUILD_IOS);
+  note.textContent = 'iPhone のアプリはまだ準備中です。今は「最新のブラウザ版」を Safari で開いて、「ブラウザ」「実機・ブラウザ」の項目を確かめられます。';
+}
 
 function fmt(ms) {
   const d = new Date(ms);
@@ -186,7 +221,8 @@ function fmt(ms) {
 
 function renderProgress() {
   const c = { todo: 0, ok: 0, ng: 0 };
-  ITEMS.forEach((it) => { c[rec(it.id).status]++; });
+  const all = items();
+  all.forEach((it) => { c[rec(it.id).status]++; });
   const p = $('#progress'); p.innerHTML = '';
   ['todo', 'ok', 'ng'].forEach((k) => {
     const s = document.createElement('span'); s.textContent = STATUS_LABEL[k] + ' ';
@@ -194,7 +230,7 @@ function renderProgress() {
   });
   const bar = $('#bar'); bar.innerHTML = '';
   [['ok', 'var(--ok)'], ['ng', 'var(--ng)']].forEach(([k, color]) => {
-    const i = document.createElement('i'); i.style.width = (c[k] / ITEMS.length * 100) + '%'; i.style.background = color; bar.appendChild(i);
+    const i = document.createElement('i'); i.style.width = (c[k] / all.length * 100) + '%'; i.style.background = color; bar.appendChild(i);
   });
 }
 
@@ -207,7 +243,7 @@ function render() {
   renderProgress();
   document.querySelectorAll('[data-filter]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === filter)));
   const list = $('#list'); list.innerHTML = '';
-  const shown = ITEMS.filter((it) => filter === 'all' || rec(it.id).status === filter);
+  const shown = items().filter((it) => filter === 'all' || rec(it.id).status === filter);
   if (!shown.length) {
     const e = document.createElement('div'); e.className = 'empty';
     e.textContent = filter === 'todo' ? '未確認の項目はありません。おつかれさまでした。' : STATUS_LABEL[filter] + 'の項目はありません。';
@@ -251,20 +287,26 @@ document.querySelectorAll('[data-filter]').forEach((b) => b.addEventListener('cl
   render();
 }));
 
-// その他（項目にない気づき）。端末の中に残す
-let other = '';
-try { other = localStorage.getItem(KEY + '/other') || ''; } catch (e) { /* その場だけ */ }
+// その他（項目にない気づき）。端末の中に、端末ごとに残す
 $('#other').value = other;
 $('#other').addEventListener('input', (e) => {
   other = e.target.value;
-  try { localStorage.setItem(KEY + '/other', other); } catch (err) { /* その場だけ */ }
+  try { localStorage.setItem(keyOf('other'), other); } catch (err) { /* その場だけ */ }
 });
+
+// 確かめる端末の切り替え。記録を読み直して描き直す
+document.querySelectorAll('[data-os]').forEach((b) => b.addEventListener('click', () => {
+  os = b.dataset.os;
+  try { localStorage.setItem(KEY + '/os', os); } catch (e) { /* その場だけ */ }
+  load(); $('#other').value = other; renderBuild(); render();
+}));
 
 // 結果を文にまとめる。「メールで送る」は宛先・件名・本文が入ったメールを開く（2026-10-18。ユーザーの指示）
 function report() {
-  const lines = ['数独テスト台帳 ' + BUILD.version + ' / commit ' + BUILD.commit, ''];
+  const b = build();
+  const lines = ['数独テスト台帳（' + OS_LABEL[os] + '） ' + (b ? b.version + ' / commit ' + b.commit : 'ブラウザ版'), ''];
   ['ng', 'ok', 'todo'].forEach((k) => {
-    const arr = ITEMS.filter((it) => rec(it.id).status === k);
+    const arr = items().filter((it) => rec(it.id).status === k);
     if (!arr.length) return;
     lines.push('■ ' + STATUS_LABEL[k] + '（' + arr.length + '）');
     arr.forEach((it) => {
@@ -282,7 +324,8 @@ function report() {
 const toast = (s) => { $('#toast').textContent = s; setTimeout(() => { $('#toast').textContent = ''; }, 2500); };
 const MAIL_TO = 'karaagesoft@gmail.com';
 $('#send').addEventListener('click', () => {
-  const subject = '数独テスト台帳の結果（' + BUILD.version + ' / ' + BUILD.commit + '）';
+  const b = build();
+  const subject = '数独テスト台帳の結果（' + OS_LABEL[os] + '・' + (b ? b.version + ' / ' + b.commit : 'ブラウザ版') + '）';
   location.href = 'mailto:' + MAIL_TO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(report());
 });
 $('#copy').addEventListener('click', async () => {
@@ -290,6 +333,7 @@ $('#copy').addEventListener('click', async () => {
   catch (e) { toast('コピーできませんでした。'); }
 });
 
+renderBuild();
 render();
 </script>
 </body>
