@@ -136,7 +136,7 @@
 
 <script>
 // 確かめる版
-const BUILD = { version: '1.0.2（versionCode 20・内部テスト）', commit: 'b2ba416', updated: '2026-11-01' };
+const BUILD = { version: '1.0.2（versionCode 20・内部テスト）', commit: 'c6532eb', updated: '2026-11-01' };
 
 // 確認項目。env は device（実機）・web（ブラウザ）・both
 const ITEMS = [
@@ -160,6 +160,8 @@ const ITEMS = [
     how: '10/30 にいただいた案。2枚がちょうど3と7の入れ替えになっていて、どちらも成り立つ＝答えが2通り、という流れ。2つのブロックを囲んでいる。' },
   { id: 'roll-book-numbered', area: '横展開', env: 'both', title: '📖の ALS-XZ（本筋・つながる形・つながらない形）とスー・ド・コックの「あと一歩で埋まる組が2つ」の段で、組を①②と呼ぶ（ヒントの文・図の印と同じ）',
     how: '本筋は「１行の組を①、４行の組を②とします」から。場合の段は「①から4が抜けるので」。スー・ド・コックの図2枚にも①②の印。' },
+  { id: 'tr-1101', area: '翻訳', env: 'both', title: '言語を English 以外（例：Deutsch・中文）にすると、ALS-XZ の📖とヒントの文（組が3つの形・①②③の組・リモートペアを1マスずつたどる文）が、英語ではなくその言語で出る',
+    how: '設定の言語を切り替え、デバッグの ALS・ALS-XY-Wing・Remote Pairs の見本でヒントを出し、📖も開く。言い回しの細かい所はネイティブに見てもらうとして、英語の文が混ざっていないかだけ見る。' },
 ];
 
 const ENV_LABEL = { device: '実機', web: 'ブラウザ', both: '実機・ブラウザ' };
