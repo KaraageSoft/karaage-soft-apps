@@ -145,7 +145,7 @@
 
 <script>
 // 確かめる版
-const BUILD = { version: 'native-glow ブランチ（光を端末の側で動かす試し。Expo Go か内部テストで確かめる）', commit: 'e2e6e8a', updated: '2026-11-06' };
+const BUILD = { version: 'native-glow ブランチ（光を端末の側で動かす試し。Expo Go か内部テストで確かめる）', commit: 'ac2b469', updated: '2026-11-06' };
 // iPhone の版（TestFlight）。できるまでは null で、iPhone ではブラウザ版で確かめる（2026-11-01）
 const BUILD_IOS = null;
 
@@ -153,6 +153,8 @@ const BUILD_IOS = null;
 const ITEMS = [
   { id: 'native-kindle-1106', area: '光（端末の側で動かす版）', env: 'device', os: 'android', title: 'Kindle で、「このどれか」のマスが4つ交互に大きくなるヒントを出すと、4つとも順に大きくなるのが見える',
     how: '前は2つぐらいしか見えなかった。どのくらいなめらかかをコメントに書く。' },
+  { id: 'native-end-1106', area: '光（端末の側で動かす版）', env: 'device', title: 'ヒントの光が全部消えたあと、次の周回が始まるまでの間に、マスが一瞬光らない',
+    how: 'Expo Go で出ていたものを直した（色の計算が範囲の外で止まらなかった）。何周か見る。' },
   { id: 'native-smooth-1106', area: '光（端末の側で動かす版）', env: 'device', title: 'ALS-XZ など光るメモの多いヒントで、光がなめらかで、光っている間もほかのボタンがすぐ反応する',
     how: '' },
   { id: 'native-open-1106', area: '光（端末の側で動かす版）', env: 'device', title: 'ヒントを出した瞬間・閉じる瞬間の引っかかりが、前より大きくなっていない',
