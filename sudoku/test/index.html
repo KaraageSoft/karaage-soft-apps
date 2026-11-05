@@ -145,12 +145,24 @@
 
 <script>
 // 確かめる版
-const BUILD = { version: '1.0.2 のあとの直し（Expo Go・ブラウザ版で確かめる）', commit: '27894e3', updated: '2026-11-05' };
+const BUILD = { version: '1.0.3 / versionCode 23（内部テストで確かめる）', commit: 'db10a04', updated: '2026-11-05' };
 // iPhone の版（TestFlight）。できるまでは null で、iPhone ではブラウザ版で確かめる（2026-11-01）
 const BUILD_IOS = null;
 
 // 確認項目。env は device（実機）・web（ブラウザ）・both。os を 'android' か 'ios' にすると、その端末だけに出す
 const ITEMS = [
+  { id: 'internal-start-1105', area: '内部テストの 1.0.3', env: 'device', title: '内部テストの版に更新して開くと、落ちずに起動し、更新のお知らせに 1.0.3 の欄が出る',
+    how: '更新のあと最初に開いたときに出る。ゲームの説明の「バージョン情報」からも見られる。' },
+  { id: 'internal-glow-1105', area: '内部テストの 1.0.3', env: 'device', title: 'ALS-XZ のヒント（解法の表示）を出したとき、Expo Go より光がなめらかで、ほかのボタンもすぐ反応する',
+    how: 'ビルドした版でいちばん見たいところ。Expo Go は開発版なので重めに出ていた。' },
+  { id: 'internal-glow-same-1105', area: '内部テストの 1.0.3', env: 'device', title: 'いくつかの解き方でヒントを出し、光り方（順番・色・メモの白い縁・点滅）がおかしくなく、何周か見ていてもマスと囲みの光がずれない',
+    how: '場合分けのある解き方と「このどれか」が交互に大きくなる解き方も見る。' },
+  { id: 'internal-check-1105', area: '内部テストの 1.0.3', env: 'device', title: '答えと違う数字を入れてチェックを押すと、間違いのマスが赤く光り続け、全部直すか別の数字を選ぶと止まる',
+    how: 'この光だけ動かし方が違う（端末の側で動かす）ので、ビルドでも確かめる。止まったあとに赤が残らないかも見る。' },
+  { id: 'internal-memo-1105', area: '内部テストの 1.0.3', env: 'device', title: '普通以上で📝表示を押したとき、すぐメモが出て、すぐ消える',
+    how: 'Expo Go では「少し早いかもしれない」くらいだった。ビルドで気になるかどうかを見る。' },
+  { id: 'internal-basic-1105', area: '内部テストの 1.0.3', env: 'device', title: '広告の帯・効果音と BGM・今日のテスト・通知が、今までどおり動く',
+    how: '広告は出ていることだけ見る（押さない）。' },
 ];
 
 const ENV_LABEL = { device: '実機', web: 'ブラウザ', both: '実機・ブラウザ' };
