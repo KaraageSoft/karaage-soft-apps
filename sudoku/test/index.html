@@ -145,12 +145,16 @@
 
 <script>
 // 確かめる版
-const BUILD = { version: '1.0.3 / versionCode 24（光を端末の側で動かす版を beta-release-prep に取り込み済み）', commit: '8056260', updated: '2026-11-07' };
+const BUILD = { version: '1.0.3 / versionCode 24 のあとの直し（Expo Go か次のビルドで確かめる）', commit: '6f121be', updated: '2026-11-07' };
 // iPhone の版（TestFlight）。できるまでは null で、iPhone ではブラウザ版で確かめる（2026-11-01）
 const BUILD_IOS = null;
 
 // 確認項目。env は device（実機）・web（ブラウザ）・both。os を 'android' か 'ios' にすると、その端末だけに出す
 const ITEMS = [
+  { id: 'hint-reopen-1107', area: 'ヒント', env: 'both', title: 'ヒントを出して、説明の見出しを押して説明だけ閉じたあと、点滅しているヒントボタンを押すと、光ったまま説明がもう一度出る',
+    how: '説明が開いているときに同じボタンを押すと、今までどおりヒントが終わる。ほかのボタンを押したときも今までどおり。' },
+  { id: 'first-layout-1107', area: 'ゲーム画面', env: 'device', title: 'アプリを起動して最初の1問を始めたとき、盤面やヒントのボタンの大きさが途中で変わって見えない',
+    how: '大きさが落ち着くまで、ほんの一瞬だけ画面の地の色で隠すようにした（Kindle で 0.5 秒ほど）。隠れている時間が気にならないかも見る。2問目からは隠さない。' },
 ];
 
 const ENV_LABEL = { device: '実機', web: 'ブラウザ', both: '実機・ブラウザ' };
