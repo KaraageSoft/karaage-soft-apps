@@ -3,7 +3,8 @@
   数独のお勉強のテスト台帳（2026-10-18。ユーザーの指示）。作った人が外で、最新版を確かめるためのページ。
   ・どこからもリンクしない。検索にも出さない（noindex）
   ・確認項目は下の ITEMS に書く。機能を足したら書き足す。中身を大きく変えた項目は id を変える（付けた OK/NG を引き継がない）
-  ・確かめる端末（Android／iPhone）を上で切り替える。OK/NG・メモ・その他は端末ごとに分けて残し、メールの件名と本文にも端末が入る（2026-11-01）
+  ・Android と iPhone は1つの一覧にまとめる（2026-11-09。ユーザーの指示。端末ごとに切り替えると見落とすので）。
+    片方の端末で確かめる項目は os を付け、項目の頭に「Android で確認」「iPhone で確認」と出す。os の無い項目は、どちらの端末で確かめてもよい
   ・OK/NG とメモは、開いた端末の中（localStorage）にだけ残る。「メールで送る」で宛先・件名・本文が入ったメールを開く（2026-10-18）。コピーもできる
   ・発表していない機能のことは書かない。このコメントにも名前を書かない（公開のページで、ソースは誰でも読めるので。どれのことかは手元のメモにある）
 -->
@@ -29,17 +30,23 @@
     --ok-bg: #e4f2e4;
     --ng: #b3392f;
     --ng-bg: #f8e3e0;
+    --droid: #2e6b30;
+    --droid-bg: #e2efdc;
+    --ios: #1f5a9e;
+    --ios-bg: #e1ebf7;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --bg: #1c1b18; --card: #26251f; --fg: #ece8dd; --muted: #a09a89; --rule: #3a382f; --link: #86c7a4;
       --accent: #4caf50; --accent-fg: #0f1a10; --chip: #302f27; --ok: #7fcf87; --ok-bg: #22361f; --ng: #f08a7f; --ng-bg: #3e2320;
+      --droid: #9bd49a; --droid-bg: #253621; --ios: #9cc4f2; --ios-bg: #1f2c3d;
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
     --bg: #1c1b18; --card: #26251f; --fg: #ece8dd; --muted: #a09a89; --rule: #3a382f; --link: #86c7a4;
     --accent: #4caf50; --accent-fg: #0f1a10; --chip: #302f27; --ok: #7fcf87; --ok-bg: #22361f; --ng: #f08a7f; --ng-bg: #3e2320;
+    --droid: #9bd49a; --droid-bg: #253621; --ios: #9cc4f2; --ios-bg: #1f2c3d;
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
@@ -72,7 +79,6 @@
     border-radius: 999px; padding: 6px 14px; cursor: pointer; min-height: 40px;
   }
   button.main { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
-  .os button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
   .filters button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
   .group { display: grid; gap: 10px; }
   .item { background: var(--card); border: 1px solid var(--rule); border-left-width: 6px; border-radius: 12px; padding: 12px 14px; display: grid; gap: 8px; }
@@ -81,6 +87,11 @@
   .head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
   .title { font-weight: 700; flex: 1 1 14rem; }
   .chip { font-size: .75rem; padding: 1px 8px; border-radius: 999px; background: var(--chip); color: var(--muted); white-space: nowrap; }
+  /* どちらの端末で確かめるか。題名の前に、色を付けて目立たせる */
+  .device { font-size: .8rem; font-weight: 700; padding: 1px 10px; border-radius: 999px; white-space: nowrap; border: 1px solid; }
+  .device[data-os="android"] { color: var(--droid); background: var(--droid-bg); border-color: var(--droid); }
+  .device[data-os="ios"] { color: var(--ios); background: var(--ios-bg); border-color: var(--ios); }
+  .build span { display: block; }
   .how { margin: 0; font-size: .92rem; }
   .status button[data-v="ok"][aria-pressed="true"] { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); font-weight: 700; }
   .status button[data-v="ng"][aria-pressed="true"] { background: var(--ng-bg); border-color: var(--ng); color: var(--ng); font-weight: 700; }
@@ -101,12 +112,6 @@
   <div class="card">
     <h1>数独テスト台帳</h1>
     <p class="build" id="build"></p>
-    <div class="row os" role="group" aria-label="確かめる端末">
-      <span class="small">確かめる端末</span>
-      <button type="button" data-os="android">Android</button>
-      <button type="button" data-os="ios">iPhone</button>
-    </div>
-    <p class="small" id="osNote" hidden></p>
     <div class="progress" id="progress"></div>
     <div class="bar" id="bar" aria-hidden="true"></div>
     <div class="row">
@@ -114,7 +119,8 @@
       <button type="button" id="copy">コピー</button>
       <span class="toast" id="toast" role="status"></span>
     </div>
-    <p class="small">OK・NG とメモは、この端末の中に、Android と iPhone で分けて残ります。「メールで送る」で、宛先と件名が入ったメールが開きます。</p>
+    <p class="small">Android と iPhone の項目は1つの一覧です。片方の端末で確かめる項目には、頭に「Android で確認」「iPhone で確認」と出ます。札の無い項目は、どちらで確かめても大丈夫です。</p>
+    <p class="small">OK・NG とメモは、このページを開いた端末の中に残ります。いつも同じ端末で開いて付けていくと、全部が1か所にそろいます。「メールで送る」で、宛先と件名が入ったメールが開きます。</p>
   </div>
 
   <div class="card">
@@ -123,7 +129,7 @@
       <a class="link primary" href="https://karaage-soft-expo-app.expo.app/" target="_blank" rel="noopener"><b>最新のブラウザ版</b><span>karaage-soft-expo-app.expo.app</span></a>
       <a class="link" href="../" target="_blank" rel="noopener"><b>紹介ページ</b><span>karaagesoft.github.io/karaage-soft-apps/sudoku/</span></a>
       <a class="link" href="https://play.google.com/store/apps/details?id=com.karaagesoft.sudoku" target="_blank" rel="noopener"><b>Google Play</b><span>内部テストの版は Play ストアのアプリから</span></a>
-      <div class="link"><b>iPhone（TestFlight）</b><span>準備中。できたら TestFlight のアプリから入れます</span></div>
+      <div class="link"><b>iPhone（TestFlight）</b><span>TestFlight のアプリから入れます（ビルド 3）</span></div>
     </div>
     <p class="small">ブラウザ版は <code>npx eas-cli deploy --prod</code> で出した最新の版です。</p>
   </div>
@@ -144,25 +150,47 @@
 </div>
 
 <script>
-// 確かめる版
-const BUILD = { version: '1.0.3 / versionCode 26（内部テストで確かめる。予習と通常モードを入れた版。25 は本番に出さない）', commit: '9fe3476', updated: '2026-11-09' };
-// iPhone の版（TestFlight）。できるまでは null で、iPhone ではブラウザ版で確かめる（2026-11-01）
-const BUILD_IOS = null;
+// 確かめる版。Android と iPhone は中身が同じ（iPhone のビルド 3 は 9fe3476 にビルド番号を足しただけ）
+const BUILDS = [
+  { label: 'Android', version: '1.0.3 / versionCode 26', note: '内部テスト。予習と通常モードを入れた版。25 は本番に出さない', short: '26' },
+  { label: 'iPhone', version: '1.0.3 / ビルド 3', note: 'TestFlight。iPhone で初めてのアプリ', short: 'ビルド 3' },
+];
+const COMMIT = '9fe3476';
+const UPDATED = '2026-11-09';
 
-// 確認項目。env は device（実機）・web（ブラウザ）・both。os を 'android' か 'ios' にすると、その端末だけに出す
+// 確認項目。env は device（実機）・web（ブラウザ）・both。
+// os を 'android' か 'ios' にすると、その端末で確かめる項目になり、頭に「Android で確認」「iPhone で確認」と出る（2026-11-09）
 const ITEMS = [
-  { id: 'internal26-start-1109', area: '内部テストの 1.0.3（26）', env: 'device', title: '内部テストの版（26）に更新して開くと、落ちずに起動し、更新のお知らせの 1.0.3 の先頭に「予習」と「通常モード」の項目がある',
+  { id: 'internal26-start-1109', area: 'Android（内部テストの 26）', env: 'device', os: 'android', title: '内部テストの版（26）に更新して開くと、落ちずに起動し、更新のお知らせの 1.0.3 の先頭に「予習」と「通常モード」の項目がある',
     how: 'ゲームの説明の「バージョン情報」からも見られる。' },
-  { id: 'internal26-kindle-1109', area: '内部テストの 1.0.3（26）', env: 'device', os: 'android', title: 'Kindle で、光るメモの多いヒント（ALS-XZ や「このどれか」が交互に大きくなるもの）の光がなめらかで、ほかのボタンもすぐ反応する',
+  { id: 'internal26-kindle-1109', area: 'Android（内部テストの 26）', env: 'device', os: 'android', title: 'Kindle で、光るメモの多いヒント（ALS-XZ や「このどれか」が交互に大きくなるもの）の光がなめらかで、ほかのボタンもすぐ反応する',
     how: '25 と同じ見え方になっているか。' },
-  { id: 'internal26-tap-1109', area: '内部テストの 1.0.3（26）', env: 'device', title: 'ヒントを光らせている間に、答えのマスを押すと反映され、ほかのマスを押すと閉じるだけ。点滅しているヒントボタンで説明を開き直せる',
-    how: '' },
-  { id: 'internal26-lamp-1109', area: '内部テストの 1.0.3（26）', env: 'device', title: '説明の電球が点滅し、押して盤面で見たあとは点いた電球のままになる',
-    how: '' },
-  { id: 'internal26-basic-1109', area: '内部テストの 1.0.3（26）', env: 'device', title: '広告の帯・効果音と BGM・今日のテスト・通知が、今までどおり動く',
+  { id: 'internal26-basic-1109', area: 'Android（内部テストの 26）', env: 'device', os: 'android', title: '広告の帯・効果音と BGM・今日のテスト・通知が、今までどおり動く',
     how: '広告は出ていることだけ見る（押さない）。' },
+  { id: 'ios-start-1109', area: 'iPhone（TestFlight のビルド 3）', env: 'device', os: 'ios', title: 'TestFlight から入れて開くと、落ちずに起動する。ホーム画面のアイコンの下の名前が「数独のお勉強」で、切れずに出る',
+    how: 'iPhone の言語が英語なら「Sudoku Practice」。更新のお知らせ（ゲームの説明の「バージョン情報」）の 1.0.3 も見られる。' },
+  { id: 'ios-screen-1109', area: 'iPhone（TestFlight のビルド 3）', env: 'device', os: 'ios', title: 'iPhone SE で、タイトル・盤面・ボタンが縮まずに画面いっぱいに収まり、上の時刻や電池の表示と重ならない',
+    how: 'Safari のブラウザ版ではアドレスバーのぶん少し小さく見えたが、アプリでは縮まない。' },
+  { id: 'ios-text-1109', area: 'iPhone（TestFlight のビルド 3）', env: 'device', os: 'ios', title: 'ボタン・吹き出し・説明の字が枠からはみ出さず、メモの小さい数字もマスの中でずれずにそろう',
+    how: 'iPhone は字の形が Android と違うので、文の長い所（ヒントの説明・設定・チュートリアルの帯）も見る。' },
+  { id: 'ios-sound-1109', area: 'iPhone（TestFlight のビルド 3）', env: 'device', os: 'ios', title: '効果音が押すたびに鳴り（2回に1回だけ、にならない）、BGM も流れる。設定の音量で大きさが変わる',
+    how: '本体の消音スイッチを入れたときの鳴り方は、気づいたことに書く。' },
+  { id: 'ios-ads-1109', area: 'iPhone（TestFlight のビルド 3）', env: 'device', os: 'ios', title: '広告の帯の場所があり、盤面やボタンにかぶらない。初めて開いたときに追跡の許可を聞く窓が出たら、日本語のアプリの説明の文になっている',
+    how: '広告は出ていることだけ見る（押さない）。App Store に出す前は広告が届かず、帯が空いたままのこともある。許可の窓は出ないこともあり、出たら「許可しない」でよい。' },
+  { id: 'ios-back-1109', area: 'iPhone（TestFlight のビルド 3）', env: 'device', os: 'ios', title: 'どの画面からも、画面の中のボタンで1つ前やタイトルへ戻れる（Android の戻るボタンが無くても困らない）',
+    how: '設定・ゲームの説明・今日のテスト・問題を作る画面・ヒントの説明の窓など。' },
+  { id: 'ios-resume-1109', area: 'iPhone（TestFlight のビルド 3）', env: 'device', os: 'ios', title: '解きかけのままアプリを終了して開き直すと、「勉強を始める」で続きからを聞かれ、続きを遊べる',
+    how: 'アプリの終了は、ホームボタンを2回押して、このアプリを上へはらう。' },
+  { id: 'ios-daily-1109', area: 'iPhone（TestFlight のビルド 3）', env: 'device', os: 'ios', title: '今日のテストの問題が出て解ける。初めて開いたときに通知の許可を1回だけ聞かれ、許可すると決まった時刻に通知が来る',
+    how: '時刻は設定の「今日のテストの通知」で変えられる。' },
+  { id: 'internal26-tap-1109', area: 'ヒント', env: 'device', title: 'ヒントを光らせている間に、答えのマスを押すと反映され、ほかのマスを押すと閉じるだけ。点滅しているヒントボタンで説明を開き直せる',
+    how: '' },
+  { id: 'internal26-lamp-1109', area: 'ヒント', env: 'device', title: '説明の電球が点滅し、押して盤面で見たあとは点いた電球のままになる',
+    how: '' },
+  { id: 'lamp-seen-1107', area: 'ヒント', env: 'both', title: '電球を押して盤面で見たあと、閉じて同じ盤面で説明を開き直すと、電球は光の線の無い点いた電球のまま（見たことが分かる）。押せば今までどおり盤面に出る',
+    how: '数字やメモを入れて盤面が変わると、また光るようになる。' },
   { id: 'practice-first-1109', area: '予習', env: 'both', title: 'アプリを入れたばかりで「勉強を始める」を押すと、予習の面が先に出て「予習へようこそ」の窓が1回だけ出る',
-    how: '実機は入れ直したとき。ブラウザはシークレットウィンドウで開くと試せる。' },
+    how: 'iPhone は TestFlight で初めて入れたときに見られる。Android は入れ直したとき。ブラウザはシークレットウィンドウで開くと試せる。' },
   { id: 'practice-tutorial-1109', area: '予習', env: 'device', title: '予習・超簡単でチュートリアルが始まり、おしまいの前に「正解を教えてくれる」の説明が3つ出る。終わると予習・超簡単の問題が始まる',
     how: 'ゲームの説明の「チュートリアル」から受け直せる。簡単・普通のチュートリアルの最後にも、教えてくれるの説明が1つずつある。' },
   { id: 'practice-veryeasy-1109', area: '予習', env: 'both', title: '予習・超簡単はメモとヒントのボタンが出ない。決まるマスに入れると「このブロックで〇が入るのはここだけです。正解です！」、まだ決まらないマスは「まだ〇がここに入るかわかりません。…」と出て入らない',
@@ -187,10 +215,8 @@ const ITEMS = [
     how: '' },
   { id: 'reset-1109', area: '記録', env: 'both', title: '解きかけのまま「その他」から記録を消すと、「勉強を始める」で続きからを聞かれず、解きかけも消えている',
     how: '' },
-  { id: 'tutorial-band-1109', area: 'チュートリアル', env: 'device', title: '画面の低い端末（iPhone SE など）で、チュートリアルの帯が画面の下まで伸び、文の2行目が隠れない',
+  { id: 'tutorial-band-1109', area: 'チュートリアル', env: 'device', os: 'ios', title: '画面の低い iPhone SE で、チュートリアルの帯が画面の下まで伸び、文の2行目が隠れない',
     how: '' },
-  { id: 'lamp-seen-1107', area: 'ヒント', env: 'both', title: '電球を押して盤面で見たあと、閉じて同じ盤面で説明を開き直すと、電球は光の線の無い点いた電球のまま（見たことが分かる）。押せば今までどおり盤面に出る',
-    how: '数字やメモを入れて盤面が変わると、また光るようになる。' },
 ];
 
 const ENV_LABEL = { device: '実機', web: 'ブラウザ', both: '実機・ブラウザ' };
@@ -198,15 +224,33 @@ const STATUS_LABEL = { todo: '未確認', ok: 'OK', ng: 'NG' };
 const KEY = 'sudoku-test-notebook/v1';
 const $ = (s) => document.querySelector(s);
 
-// 確かめる端末（2026-11-01。iPhone でも確かめる）。最初は開いた端末から決め、上のボタンで切り替えられる
 const OS_LABEL = { android: 'Android', ios: 'iPhone' };
-let os = /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'ios' : 'android';
-try { os = localStorage.getItem(KEY + '/os') || os; } catch (e) { /* その場だけ */ }
-// 記録は端末ごとに分けて置く。Android はこれまでの置き場所のまま（付けた OK/NG を引き継ぐ）
-const keyOf = (name) => KEY + (os === 'ios' ? '/ios' : '') + (name ? '/' + name : '');
-// その端末で出す項目（os を付けた項目は、その端末だけ）
-const items = () => ITEMS.filter((it) => !it.os || it.os === os);
-const build = () => (os === 'ios' ? BUILD_IOS : BUILD);
+// 記録は1か所（Android と iPhone をまとめた。2026-11-09）。置き場所は前の Android と同じ（付けた OK/NG を引き継ぐ）
+const keyOf = (name) => KEY + (name ? '/' + name : '');
+const items = () => ITEMS;
+
+// 11-09 までは iPhone の分を別に残していた。1回だけ、こちらへまとめる。
+// 同じ項目は、あとで付けたほうの OK/NG を残し、iPhone で書いたメモは頭に（iPhone）を付けて足す
+function mergeOldIos() {
+  try {
+    if (localStorage.getItem(KEY + '/merged')) return;
+    const main = JSON.parse(localStorage.getItem(KEY) || '{}') || {};
+    const ios = JSON.parse(localStorage.getItem(KEY + '/ios') || '{}') || {};
+    Object.keys(ios).forEach((id) => {
+      const a = main[id] || { status: 'todo', note: '' };
+      const b = ios[id];
+      const pick = (b.at || 0) > (a.at || 0) ? b : a;
+      const notes = [(a.note || '').trim(), (b.note || '').trim() ? '（iPhone）' + b.note.trim() : ''].filter(Boolean);
+      main[id] = Object.assign({}, pick, { note: notes.join('\n') });
+    });
+    localStorage.setItem(KEY, JSON.stringify(main));
+    const o1 = (localStorage.getItem(KEY + '/other') || '').trim();
+    const o2 = (localStorage.getItem(KEY + '/ios/other') || '').trim();
+    if (o2) localStorage.setItem(KEY + '/other', [o1, '（iPhone）' + o2].filter(Boolean).join('\n'));
+    localStorage.setItem(KEY + '/merged', '1');
+  } catch (e) { /* 読めない端末では、まとめずにそのまま */ }
+}
+mergeOldIos();
 
 // 端末の中の記録 { [id]: { status, note, at } } と、その他の気づき。読めない端末でも、その場では動く
 let saved = {};
@@ -222,13 +266,14 @@ const store = () => { try { localStorage.setItem(keyOf(''), JSON.stringify(saved
 const rec = (id) => saved[id] || { status: 'todo', note: '' };
 
 function renderBuild() {
-  const b = build();
-  $('#build').textContent = b ? [b.version, 'commit ' + b.commit, '更新 ' + b.updated].join(' ・ ') : 'iPhone のアプリは準備中';
-  document.querySelectorAll('[data-os]').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.os === os)));
-  const note = $('#osNote');
-  note.hidden = !(os === 'ios' && !BUILD_IOS);
-  note.textContent = 'iPhone のアプリはまだ準備中です。今は「最新のブラウザ版」を Safari で開いて、「ブラウザ」「実機・ブラウザ」の項目を確かめられます。';
+  const box = $('#build'); box.innerHTML = '';
+  BUILDS.forEach((b) => {
+    const line = document.createElement('span'); line.textContent = b.label + '：' + b.version + '（' + b.note + '）'; box.appendChild(line);
+  });
+  const last = document.createElement('span'); last.textContent = 'commit ' + COMMIT + ' ・ 更新 ' + UPDATED; box.appendChild(last);
 }
+// メールの件名や本文の頭に入れる、版の短い書き方
+const buildShort = () => [BUILDS[0].version.split(' / ')[0], BUILDS.map((b) => b.label + ' ' + b.short).join('／')].join('・');
 
 function fmt(ms) {
   const d = new Date(ms);
@@ -274,6 +319,8 @@ function render() {
       const r = rec(it.id);
       const card = document.createElement('article'); card.className = 'item'; card.dataset.status = r.status;
       const head = document.createElement('div'); head.className = 'head';
+      // 片方の端末で確かめる項目は、題名の前にどちらかを出す（2026-11-09）
+      if (it.os) { const d = document.createElement('span'); d.className = 'device'; d.dataset.os = it.os; d.textContent = OS_LABEL[it.os] + ' で確認'; head.appendChild(d); }
       const t = document.createElement('div'); t.className = 'title'; t.textContent = it.title; head.appendChild(t);
       const c = document.createElement('span'); c.className = 'chip'; c.textContent = ENV_LABEL[it.env]; head.appendChild(c);
       card.appendChild(head);
@@ -303,31 +350,25 @@ document.querySelectorAll('[data-filter]').forEach((b) => b.addEventListener('cl
   render();
 }));
 
-// その他（項目にない気づき）。端末の中に、端末ごとに残す
+// その他（項目にない気づき）。開いた端末の中に残す
 $('#other').value = other;
 $('#other').addEventListener('input', (e) => {
   other = e.target.value;
   try { localStorage.setItem(keyOf('other'), other); } catch (err) { /* その場だけ */ }
 });
 
-// 確かめる端末の切り替え。記録を読み直して描き直す
-document.querySelectorAll('[data-os]').forEach((b) => b.addEventListener('click', () => {
-  os = b.dataset.os;
-  try { localStorage.setItem(KEY + '/os', os); } catch (e) { /* その場だけ */ }
-  load(); $('#other').value = other; renderBuild(); render();
-}));
-
 // 結果を文にまとめる。「メールで送る」は宛先・件名・本文が入ったメールを開く（2026-10-18。ユーザーの指示）
 function report() {
-  const b = build();
-  const lines = ['数独テスト台帳（' + OS_LABEL[os] + '） ' + (b ? b.version + ' / commit ' + b.commit : 'ブラウザ版'), ''];
+  const lines = ['数独テスト台帳 ' + buildShort() + ' / commit ' + COMMIT, ''];
   ['ng', 'ok', 'todo'].forEach((k) => {
     const arr = items().filter((it) => rec(it.id).status === k);
     if (!arr.length) return;
     lines.push('■ ' + STATUS_LABEL[k] + '（' + arr.length + '）');
     arr.forEach((it) => {
       // 1項目1確認にしたので、どの解き方の話かを頭に付ける（2026-10-24）
-      lines.push('・【' + it.area + '】' + it.title);
+      // 片方の端末で確かめる項目は、どちらかも書く（見出しに端末の名前があるときは重ねない）
+      const dev = it.os && !it.area.startsWith(OS_LABEL[it.os]) ? '［' + OS_LABEL[it.os] + '］' : '';
+      lines.push('・【' + it.area + '】' + dev + it.title);
       const note = (rec(it.id).note || '').trim();
       if (note) lines.push('　→ ' + note.replace(/\n/g, '\n　　'));
     });
@@ -340,8 +381,7 @@ function report() {
 const toast = (s) => { $('#toast').textContent = s; setTimeout(() => { $('#toast').textContent = ''; }, 2500); };
 const MAIL_TO = 'karaagesoft@gmail.com';
 $('#send').addEventListener('click', () => {
-  const b = build();
-  const subject = '数独テスト台帳の結果（' + OS_LABEL[os] + '・' + (b ? b.version + ' / ' + b.commit : 'ブラウザ版') + '）';
+  const subject = '数独テスト台帳の結果（' + buildShort() + '・' + COMMIT + '）';
   location.href = 'mailto:' + MAIL_TO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(report());
 });
 $('#copy').addEventListener('click', async () => {
