@@ -152,21 +152,19 @@
 <script>
 // 確かめる版。Android と iPhone は同じ中身からビルドする（版の名前・番号だけ違う）
 const BUILDS = [
-  { label: 'Android', version: '1.0.3 / versionCode 28（予定）', note: 'ビルド前。27 の項目は1つを残して OK', short: '28' },
-  { label: 'iPhone', version: '1.0.3 / ビルド 5（予定）', note: 'ビルド前。ビルド 4 の項目は OK', short: 'ビルド 5' },
+  { label: 'Android', version: '1.0.3 / versionCode 27', note: '本番に出す版。Play に上げて内部テストで確かめてから本番へ', short: '27' },
+  { label: 'iPhone', version: '1.0.3 / ビルド 4', note: 'App Store の審査に出す版。TestFlight で確かめる', short: 'ビルド 4' },
 ];
-const COMMIT = 'd52c3bc';
+const COMMIT = '7129a81';
 const UPDATED = '2026-11-10';
 
 // 確認項目。env は device（実機）・web（ブラウザ）・both。
 // os を 'android' か 'ios' にすると、その端末で確かめる項目になり、頭に「Android で確認」「iPhone で確認」と出る（2026-11-09）
 const ITEMS = [
-  { id: 'next-skip-align-1110', area: 'チュートリアル', env: 'device', os: 'android', title: 'チュートリアルで、スキップが1つだけ見え、暗くする板の穴・手袋がボタンや盤面にぴったり重なる（上にずれない）',
-    how: '前は状態バーの高さだけ上にずれ、スキップが2つ見えていた。スキップ・次へ・戻るボタンなどを指す拍で見る。' },
-  { id: 'next-apply-hold-1110', area: 'ヒント', env: 'both', title: 'ヒントを盤面で光らせている間に消すマスを押すと、今までどおり順に流してから消える。最後のオレンジのマスと赤い数字は、流れの終わりにだけ出て、長く待たない',
-    how: 'ALS-XZ など段の多いヒントで見る。前は流れの初めから赤く大きいまま待っていた。' },
-  { id: 'next-promo-slide-1110', area: '予習', env: 'both', title: '予習のクリアの画面で「通常モードへ」（または「昇段に挑む」）を押すと、段を選ぶ画面が予習の面で開いてから、通常モードの面が右から入ってくる',
-    how: 'その他→記録を消す、で予習の1問目から試せる。' },
+  { id: 'release-start-1110', area: '本番前の版（27・ビルド 4）', env: 'device', title: '本番前の版に更新して開くと、落ちずに起動する。更新のお知らせの 1.0.3 に「初めての方は予習から始まります。…」と、直したところの「チュートリアルで、スキップボタンが二重に見えたり…」がある',
+    how: 'ゲームの説明の「バージョン情報」からも見られる。' },
+  { id: 'release-basic-1110', area: '本番前の版（27・ビルド 4）', env: 'device', title: '広告の帯・効果音と BGM・今日のテスト・通知・続きからが、今までどおり動く',
+    how: '広告は出ていることだけ見る（押さない）。iPhone は追跡の許可の窓も（入れ直したとき）。' },
 ];
 
 const ENV_LABEL = { device: '実機', web: 'ブラウザ', both: '実機・ブラウザ' };
