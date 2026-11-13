@@ -9,7 +9,8 @@
   アプリの中で見つけてもらう機能のことは書かない（見つけてからのお楽しみ）。このコメントにも名前を書かない（ソースは誰でも読めるので）。
   ・iPhone 版は App Store の審査中（2026-11-12）。バッジの代わりに「ごめんなさい」の枠を置き、「iPhone の方へ」で
     TestFlight の公開リンク（審査中のテスト版）とブラウザ版を案内する。App Store で公開されたら、枠を App Store のバッジに替え、
-    「iPhone の方へ」は消す
+    「iPhone の方へ」は消す。App Store のページ（https://apps.apple.com/app/id6831991492。ASC の Apple ID）へのリンクは
+    先に枠の中に置いてある（2026-11-13。公開されるまでは開けない。公開したらすぐ使えるように）
 -->
 <html lang="ja">
 <head>
@@ -157,7 +158,9 @@
     color: var(--fg); text-decoration: none; font-size: .88rem; line-height: 1.5;
   }
   .ios-wait b { font-size: .95rem; }
-  .ios-wait .go { color: var(--link); font-weight: 700; }
+  .ios-wait a { color: var(--link); font-weight: 700; text-decoration: none; }
+  .ios-wait a:hover { text-decoration: underline; }
+  .ios-wait .store { font-weight: 600; font-size: .82rem; }
 
   /* iPhone の方へ（テスト版の入れ方） */
   #iphone { background: var(--soft); }
@@ -202,11 +205,12 @@
       </ul>
       <div class="buttons">
         <a class="play-badge" href="https://play.google.com/store/apps/details?id=com.karaagesoft.sudoku&amp;pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1"><img alt="Google Play で手に入れよう" src="https://play.google.com/intl/en_us/badges/static/images/badges/ja_badge_web_generic.png" width="646" height="250"></a>
-        <a class="ios-wait" href="#iphone">
+        <div class="ios-wait">
           <b>iPhone の方はごめんなさい…。</b>
           <span>まだ審査中です。<br>リリースされたらここに入ります！</span>
-          <span class="go">審査中のテスト版なら遊べます →</span>
-        </a>
+          <a href="#iphone">審査中のテスト版なら遊べます →</a>
+          <a class="store" href="https://apps.apple.com/app/id6831991492" target="_blank" rel="noopener">App Store のページ（リリースされたら開けます）</a>
+        </div>
         <a class="btn btn-sub" href="https://karaage-soft-expo-app.expo.app/" target="_blank" rel="noopener">ブラウザで遊ぶ</a>
       </div>
       <p class="note">Android 版は無料（広告あり）。iPhone 版は App Store の審査中です。ブラウザ版はパソコンやタブレット、スマートフォンでそのまま試せます。</p>
@@ -367,11 +371,12 @@
       <h2>さっそく始める</h2>
       <div class="buttons">
         <a class="play-badge" href="https://play.google.com/store/apps/details?id=com.karaagesoft.sudoku&amp;pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1"><img alt="Google Play で手に入れよう" src="https://play.google.com/intl/en_us/badges/static/images/badges/ja_badge_web_generic.png" width="646" height="250"></a>
-        <a class="ios-wait" href="#iphone">
+        <div class="ios-wait">
           <b>iPhone の方はごめんなさい…。</b>
           <span>まだ審査中です。<br>リリースされたらここに入ります！</span>
-          <span class="go">審査中のテスト版なら遊べます →</span>
-        </a>
+          <a href="#iphone">審査中のテスト版なら遊べます →</a>
+          <a class="store" href="https://apps.apple.com/app/id6831991492" target="_blank" rel="noopener">App Store のページ（リリースされたら開けます）</a>
+        </div>
         <a class="btn btn-sub" href="https://karaage-soft-expo-app.expo.app/" target="_blank" rel="noopener">ブラウザで遊ぶ</a>
       </div>
     </div>
