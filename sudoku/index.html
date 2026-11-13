@@ -11,6 +11,8 @@
     TestFlight の公開リンク（審査中のテスト版）とブラウザ版を案内する。App Store で公開されたら、枠を App Store のバッジに替え、
     「iPhone の方へ」は消す。App Store のページ（https://apps.apple.com/app/id6831991492。ASC の Apple ID）へのリンクは
     先に枠の中に置いてある（2026-11-13。公開されるまでは開けない。公開したらすぐ使えるように）
+  ・いまの版は Android・iPhone・ブラウザごとに書く（2026-11-14。ユーザーの指示：ばらばらでもよいように）。出すたびに直す。
+    ブラウザ版は新しい機能を先に入れることがある（1.0.4 の画像から取り込むは、ブラウザ版に先に出した）
 -->
 <html lang="ja">
 <head>
@@ -102,6 +104,13 @@
   .btn-sub { border: 2px solid var(--accent); color: var(--link); }
   .btn svg { width: 1.2rem; height: 1.2rem; }
   .note { color: var(--muted); font-size: .85rem; margin: .75rem 0 0; }
+  /* いまの版（Android・iPhone・ブラウザで、ずれていてもよいように1つずつ書く） */
+  .versions { margin: 1rem 0 0; font-size: .9rem; }
+  .versions-title { display: block; font-size: .85rem; color: var(--muted); margin-bottom: .2rem; }
+  .versions ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .15rem; }
+  .versions li { display: flex; gap: .75rem; align-items: baseline; }
+  .versions li b { min-width: 4.6rem; }
+  .versions li span { color: var(--muted); }
   .qr-card {
     justify-self: center; text-align: center;
     background: var(--card); border-radius: 16px; padding: 1.25rem; box-shadow: var(--shadow);
@@ -213,7 +222,15 @@
         </div>
         <a class="btn btn-sub" href="https://karaage-soft-expo-app.expo.app/" target="_blank" rel="noopener">ブラウザで遊ぶ</a>
       </div>
-      <p class="note">Android 版は無料（広告あり）。iPhone 版は App Store の審査中です。ブラウザ版はパソコンやタブレット、スマートフォンでそのまま試せます。</p>
+      <div class="versions">
+        <b class="versions-title">いまの版</b>
+        <ul>
+          <li><b>Android</b><span>1.0.3（Google Play）</span></li>
+          <li><b>iPhone</b><span>1.0.3（App Store の審査中・テスト版で遊べます）</span></li>
+          <li><b>ブラウザ</b><span>1.0.4（画像から問題を取り込む機能を、先に入れた版）</span></li>
+        </ul>
+      </div>
+      <p class="note">Android・iPhone 版は無料（広告あり）。ブラウザ版はパソコンやタブレット、スマートフォンでそのまま試せます。ブラウザ版には、新しい機能を先に入れることがあります。</p>
     </div>
     <div class="qr-card">
       <img src="img/qr-play.svg" alt="Google Play のページを開く QR コード" width="180" height="180">
