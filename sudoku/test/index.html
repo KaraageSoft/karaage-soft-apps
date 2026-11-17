@@ -129,7 +129,7 @@
       <a class="link primary" href="https://karaage-soft-expo-app.expo.app/" target="_blank" rel="noopener"><b>最新のブラウザ版</b><span>karaage-soft-expo-app.expo.app</span></a>
       <a class="link" href="../" target="_blank" rel="noopener"><b>紹介ページ</b><span>karaagesoft.github.io/karaage-soft-apps/sudoku/</span></a>
       <a class="link" href="https://play.google.com/store/apps/details?id=com.karaagesoft.sudoku" target="_blank" rel="noopener"><b>Google Play</b><span>内部テストの版は Play ストアのアプリから</span></a>
-      <div class="link"><b>iPhone（TestFlight）</b><span>TestFlight のアプリから入れます（ビルド 3）</span></div>
+      <div class="link"><b>iPhone（TestFlight）</b><span>TestFlight のアプリから入れます</span></div>
     </div>
     <p class="small">ブラウザ版は <code>npx eas-cli deploy --prod</code> で出した最新の版です。</p>
   </div>
@@ -150,83 +150,18 @@
 </div>
 
 <script>
-// 確かめる版。Android と iPhone は同じ中身からビルドする（版の名前・番号だけ違う）
-const BUILDS = [
-  { label: 'Android', version: '1.0.3 / versionCode 27', note: '本番に出す版。Play に上げて内部テストで確かめてから本番へ', short: '27' },
-  { label: 'iPhone', version: '1.0.3 / ビルド 4', note: 'App Store の審査に出す版。TestFlight で確かめる', short: 'ビルド 4' },
-];
-const COMMIT = '7129a81';
+// 何で試すか（2026-11-18。ユーザーの指示：ビルドの番号やコミットを書かれても分からない）。
+// 端末に配る版を作ったら、「1.0.4 の版（Play の内部テスト・TestFlight で配ったもの）」のように、分かる言葉で書く
+const WHERE = { label: '試し方', text: 'Expo Go', note: '直したものは、Expo Go を開き直すとすぐ試せます' };
 const UPDATED = '2026-11-18';
 
 // 確認項目。env は device（実機）・web（ブラウザ）・both。
 // os を 'android' か 'ios' にすると、その端末で確かめる項目になり、頭に「Android で確認」「iPhone で確認」と出る（2026-11-09）
 const ITEMS = [
-  { id: 'release-start-1110', area: '本番前の版（27・ビルド 4）', env: 'device', title: '本番前の版に更新して開くと、落ちずに起動する。更新のお知らせの 1.0.3 に「初めての方は予習から始まります。…」と、直したところの「チュートリアルで、スキップボタンが二重に見えたり…」がある',
-    how: 'ゲームの説明の「バージョン情報」からも見られる。' },
-  { id: 'release-basic-1110', area: '本番前の版（27・ビルド 4）', env: 'device', title: '広告の帯・効果音と BGM・今日のテスト・通知・続きからが、今までどおり動く',
-    how: '広告は出ていることだけ見る（押さない）。iPhone は追跡の許可の窓も（入れ直したとき）。' },
-  { id: 'tut-skip-fade-1110', area: '次の版（d766b1e 以降のビルド）', env: 'both', title: 'チュートリアルで、スキップボタンが光っているボタンに重なる拍では、スキップが薄くなり、下のボタンがよく見える（X-ウィング系のボタンを押すヒントの拍など）。その拍が終わると元の濃さに戻る',
-    how: '難しい・普通のチュートリアルで、ヒントのボタンを押す拍を見る。スキップそのものを指す拍（いつでも飛ばせます）では薄くならない。' },
-  { id: 'editor-clear-back-1111', area: '次の版（8ebd433 以降のビルド）', env: 'both', title: '問題を作る画面で作った盤面を「遊ぶ」で解くと、クリアの案内に「作成に戻る」だけが出て、押すと作った盤面のまま作る画面に戻る',
-    how: '正解作成から数マス消して遊ぶ→解く。戻った盤面が遊ぶ前と同じか（消したマスが空き）を見る。' },
-  { id: 'apply-flash-xchain-1111', area: '次の版（a8508e9 以降のビルド）', env: 'device', title: 'X-チェーンのボタンを長押しして反映すると、鎖を作っていく間に鎖のマスが青く光り、追っている数字のメモが大きくなる。最後に消すマスがオレンジ・赤い数字になり、消しゴムで消える',
-    how: '難しい以上の段か予習で、X-チェーンが光っているときに長押し。ほかの解法（ALS-XZ など）の長押しも、前と同じように最後まで流れるかを見る。' },
-  { id: 'apply-flash-area-1111', area: '次の版（e465070 以降のビルド）', env: 'device', title: 'どの解法でもヒントのボタンを長押しして反映すると、行・列・ブロックの囲みは、中のマスと一緒に光る（囲みだけが先に光る時間が無い）',
-    how: 'ポインティング・ボックスライン・N国同盟・Y-ウィング・X-ウィングなど、囲みの出る解法をいくつか長押し。最後に消すマスのオレンジと赤い数字は、前と同じく終わりのほうで光る。' },
-  { id: 'show-area-1111', area: '次の版（68d054a 以降のビルド）', env: 'device', title: 'ヒントを出したときも、行・列・ブロックの囲みは中のマスと一緒に光る（囲みだけが先に光る拍が無い）。単一候補は、数える数字の順に、その数字のある囲みが出ていく',
-    how: 'ポインティング・N国同盟・単一位置・単一候補などのヒントを出して、最初の拍を見る。📖の1枚目の図も囲みとマスが一緒に描かれている（単一位置の1段落目は文だけになった）。' },
-  { id: 'figure-xchain-1111', area: '次の版（66c8b05 以降のビルド）', env: 'device', title: 'X-チェーンの📖の図4枚が、ゲームの光り方と同じ（強いつながり・弱いつながりは青い2マス、3枚目は始まりに入らない場合のたどり方、4枚目は消すマスがオレンジ）。ALS-XY-ウィングの最後の図に、組③の5（Ｄ５・Ｄ７）の濃い青が入っている',
-    how: 'X-チェーンと ALS-XZ の📖を開いて、図を押して大きくして見る。文の流れと図が合っているか。' },
-  { id: 'editor-close-text-1112', area: '次の版（5aab805 以降のビルド）', env: 'device', title: '問題を作る画面の「問題自動生成」の窓と、「パスワードをコピー」の窓の一番下の「閉じる」に、字が出ている（前は Android で字の無い枠だけだった）',
-    how: '問題を作る画面で「問題自動生成」を開き、一番下の「閉じる」を見て押す。数字を1つ入れて「パスワードをコピー」も開いて、「閉じる」を見る。「正解作成」のボタンも前と同じに見えるか。' },
-  { id: 'sheet-scroll-1114', area: '次の版（0026b9a 以降のビルド）', env: 'device', title: '問題を作る画面の「問題自動生成」の窓が、どこを触っても上下に転がる（前は Android でパスワードの欄を触っているときだけ転がった）。設定の窓も、中を触って転がせる',
-    how: '問題を作る画面で「問題自動生成」を開き、見出しや解法のボタンの上から指を上下に動かして、窓の中が転がるか見る。窓の中の字を押しても閉じず、窓の外の暗いところを押すと閉じるか。遊ぶ画面の「設定」も、同じように転がす・中を押す・外を押すを試す。' },
-  { id: 'fable-hint-panel-1116', area: '次の版（041281e 以降のビルド）', env: 'device', title: 'ヒントを開く・閉じるとき、説明の欄が滑らかにせり上がって閉じる。解法の数行がふわっと現れる。断られたときの赤い光が残らない',
-    how: 'ヒントのボタンを押して説明を開き、見出しを押して閉じる。開いた直後に閉じる・続けて開け閉めしても、欄が途中で止まらないか。選んでいる数字に無いヒントを続けて押して、ボタンと見出しの赤い光が消えるか。' },
-  { id: 'fable-tutorial-hand-1116', area: '次の版（041281e 以降のビルド）', env: 'device', title: 'チュートリアルの手袋が滑らかに動く（指す・なぞる・四角くなぞる・順にまわる・2本指）。次の拍に移ったとき、前の動きの途中の位置に一瞬出ない',
-    how: '超簡単〜難しいのチュートリアルを進めて、手袋の動きを見る。スキップしたあと・終えたあとに手袋が残らないか。もう一度チュートリアルを始めても動くか。' },
-  { id: 'fable-clear-notice-1116', area: '次の版（041281e 以降のビルド）', env: 'device', title: 'クリアの案内が浮き出て、点数が0から数え上がる。90点以上は点数が弾み、ほめ言葉が左から光る',
-    how: '問題を解き切って、案内と点数を見る。案内が出てすぐ「次のゲーム」を押し、次のクリアでも同じに出るか（案内が一瞬濃く出たり、点数が大きいまま出たりしないか）。昇段の証書が出る場面も前と同じか。' },
-  { id: 'fable-reveal-1116', area: '次の版（041281e 以降のビルド）', env: 'device', title: '問題を始めたとき、数字が順に出てきて、最後に全部そろう（数字が欠けたままにならない）',
-    how: '新しい問題を何度か始めて、出方（渦・波・広がり・数字順）を見る。出ている途中でタイトルへ戻る・続けて別の問題を始める・「続きから」・今日のテスト・チュートリアルのあとの新しい問題でも、全部の数字が出るか。' },
-  { id: 'fable-buttons-1116', area: '次の版（041281e 以降のビルド）', env: 'device', title: '「戻る」の青い光・もう戻れないときの赤い光・チェックの点滅・盤面の枠の光が、途中で消えたり残ったりしない',
-    how: '数字を入れて「戻る」を押す。戻れなくなるまで押して赤い光を見る。長押しで続けて戻す。わざと間違えてチェックの点滅を出し、直すと消えるか。ヒントを長押しで続けて反映して、盤面の枠の光が途中で消えないか。' },
-  { id: 'coach-loose-1117', area: '次の版（033a0ff 以降のビルド）', env: 'both', title: '予習の「正解を教えてくれる」で、N国同盟などで正しく消せるメモは、そのマスがほかの手で埋まるときでも通る（前は「ここを削除できるヒントはありません」と断っていた）',
-    how: 'N国同盟の組の外で、単一位置でも埋まるマス（例：列の2マスが25のとき、同じ列の235のマス）の2を消してみる。答えの数字のメモは今までどおり断られるか。' },
-  { id: 'coach-words-1117', area: '次の版（033a0ff 以降のビルド）', env: 'both', title: '教えてくれるの一言が「Ａ４は「N国同盟」で2を削除できます。」のようにマスの座標で始まる。理由がいくつかあるときは、次の行に「「隠れN国同盟」でも削除できます。」と並ぶ（3つまで）',
-    how: 'メモを消す・確定する・断られる、のそれぞれで一言を見る。確定は単一位置と単一候補の両方で決まるマスで2つ並ぶか。吹き出しが盤面からはみ出さないか。' },
-  { id: 'terms-1118', area: '次の版（584875e 以降のビルド）', env: 'both', title: '日本語で、解法名が「XY-チェーン」（前は XY鎖）、ほぼロック集合の📖の文・見出しが「ほぼロック集合-XZ」「ほぼロック集合-XY-ウィング」（前は ALS-XZ など）になっている',
+  { id: 'terms-1118', area: '11/18 に直したもの（Expo Go で試せます）', env: 'both', title: '日本語で、解法名が「XY-チェーン」（前は XY鎖）、ほぼロック集合の📖の文・見出しが「ほぼロック集合-XZ」「ほぼロック集合-XY-ウィング」（前は ALS-XZ など）になっている',
     how: 'XY-チェーンとほぼロック集合-XZ の📖を開く。ヒントを出したときの見出しも見る。' },
-  { id: 'import-pick-big-1118', area: '次の版（6474959 以降のビルド）', env: 'both', title: '画像から取り込むの窓の「画像を選ぶ」が大きいボタン（緑がかった青）になっている',
+  { id: 'import-pick-big-1118', area: '11/18 に直したもの（Expo Go で試せます）', env: 'both', title: '画像から取り込むの窓の「画像を選ぶ」が大きいボタン（緑がかった青）になっている',
     how: '問題を作る画面で「画像から取り込む」を押す。' },
-  { id: 'editor-bg-1118', area: '次の版（1ba697f 以降のビルド）', env: 'both', title: '今日のテストや予習を遊んだあとに問題を作る画面へ入っても、画面の下地が白い（前は黄色・緑のままだった）',
-    how: '今日のテストを開いてからタイトルへ戻り、問題を作る。予習でも同じく。作った問題を「遊ぶ」で始めたときも白いか。' },
-  { id: 'pencil-remount-1118', area: '次の版（44005cd 以降のビルド）', env: 'device', title: 'タイトルの鉛筆が、段選びから戻ったあとも上下に動いている（11-18 に作りを変えた。前の直しは実機で効かなかった）',
-    how: 'タイトルで鉛筆が動いているのを見てから段を選ぶ画面へ進み、戻る。何度か行き来しても動いているか。' },
-  { id: 'undo-frame-1118', area: '次の版（44005cd 以降のビルド）', env: 'device', title: '「戻る」で消えた数字はクリアと同じ赤い枠、消えたメモは□の枠、戻ってきた数字・メモは入れたときと同じ枠になる。背景は光らない。長押しは前よりゆっくり（0.6秒ごと）',
-    how: '数字を入れる・メモを消す・クリアで消す、をしてから戻るを押す。長押しで止めたいところで指を離して止まれるか。' },
-  { id: 'praise-pop2-1118', area: '次の版（44005cd 以降のビルド）', env: 'device', title: '90点以上のほめ言葉の1文字ずつの弾みが、前より大きく（1.6倍）、大きいままの時間が長い',
-    how: '90点以上でクリアする。最後の字まで元の大きさに戻るか。' },
-  { id: 'xchain-weak-text-1118', area: '次の版（44005cd 以降のビルド）', env: 'both', title: 'X-チェーンの📖の弱いつながりの文が「片方に入れば、同じ並びのほかのマスには、いくつあっても入りません。強いつながりと違って…」になっている',
-    how: 'X-チェーンの📖の2枚目を読む。' },
-  { id: 'import-button-1118', area: '次の版（44005cd 以降のビルド）', env: 'both', title: '問題を作る画面に「問題自動生成」と並んで「画像から取り込む」のボタンがあり、押すと取り込みだけの窓が開く。パスワードをコピーは下の段。問題自動生成の窓には取り込みの欄が無い',
-    how: '両方のボタンを押して窓の中を見る。字が切れていないか（Android・小さい画面）。' },
-  { id: 'import-compare-first-1118', area: '次の版（44005cd 以降のビルド）', env: 'device', title: '画像を取り込むと、最初から「画像と比較」が開いている。押すといつもの入力に戻る',
-    how: '取り込んで、比較の画面が盤面の真下に出るか。押して戻ったあと、上の「画像と比較」でもう一度開けるか。' },
-  { id: 'import-pick-1118', area: '次の版（565937d 以降のビルド）', env: 'device', title: '問題を作る画面の「問題自動生成」→「画像から取り込む」で、端末の写真選びの画面が開き、スクリーンショットを選ぶと盤面が読み込まれる。写真の許可を聞かれたときの文がおかしくない',
-    how: '数独アプリのスクリーンショットを1枚選ぶ。大きい数字が正しく入るか。iPhone で許可を聞かれたら、その文（英語）も見る。Android でカメラの許可は聞かれないか。' },
-  { id: 'import-memo-1118', area: '次の版（565937d 以降のビルド）', env: 'device', title: '「メモも取り込む」を入れて読むと、メモも一緒に入る（端の取っ手が重なった右端の列も正しい）',
-    how: 'メモの入った盤面のスクリーンショットで試す。Ｉ列のメモに余計な 3・6・9 が足されていないか。' },
-  { id: 'import-crop-1118', area: '次の版（565937d 以降のビルド）', env: 'device', title: '「範囲を選んでから読む」を入れると、写真を選んだあとに切り抜きの画面が出て、選んだところだけを読む（Android は自由な四角・iPhone は正方形）',
-    how: '問題がいくつも写っている画像で、1つの盤面だけを囲んで読む。' },
-  { id: 'import-compare-1118', area: '次の版（565937d 以降のビルド）', env: 'device', title: '取り込んだあと「画像と比較」を押すと、盤面のすぐ下に読んだ画像が出る。2本指で拡大・1本指で動かせる。押すか戻るボタンで元に戻る',
-    how: 'Android では盤面と画像の大きさ・位置がずれていないか。iPhone も同じく見る。' },
-  { id: 'apply-memo-big-1117', area: '次の版（afe8c85 以降のビルド）', env: 'device', title: 'ヒントのボタンを長押しして反映すると、根拠のメモ（ポインティングの「この数字はここにしか入らない」など）も、消す候補と同じくらい大きくなる',
-    how: 'ポインティングやN国同盟のボタンを長押しして反映する。緑のメモが、赤い消す候補と同じ大きさまで大きくなるか。X-チェーンでも鎖のメモが大きくなるか。' },
-  { id: 'tut-black-reason-1117', area: '次の版（afe8c85 以降のビルド）', env: 'both', title: 'チュートリアルの「ちなみに、この状態でも黒い数字は問題の数字なので消せません。」に理由が入っている',
-    how: '超簡単のチュートリアルで、クリアの説明のあとの拍を見る。' },
-  { id: 'xchain-lines-1117', area: '次の版（afe8c85 以降のビルド）', env: 'both', title: 'X-チェーンの📖の図に、強いつながりは青い実線、弱いつながりは橙の点線が引いてある（図1は強い1本、図2は弱い1本、図3・4は鎖の5本）。文に「図では青い線で結びます」「図では橙の点線で結びます」',
-    how: 'X-チェーンの📖を開き、小さい図と、押して開く大きい図の両方を見る。線がメモの5を結んでいるか。図3で、仮に置いた大きい5に線が重なって読みにくくないか。' },
 ];
 
 const ENV_LABEL = { device: '実機', web: 'ブラウザ', both: '実機・ブラウザ' };
@@ -277,13 +212,11 @@ const rec = (id) => saved[id] || { status: 'todo', note: '' };
 
 function renderBuild() {
   const box = $('#build'); box.innerHTML = '';
-  BUILDS.forEach((b) => {
-    const line = document.createElement('span'); line.textContent = b.label + '：' + b.version + '（' + b.note + '）'; box.appendChild(line);
-  });
-  const last = document.createElement('span'); last.textContent = 'commit ' + COMMIT + ' ・ 更新 ' + UPDATED; box.appendChild(last);
+  const line = document.createElement('span'); line.textContent = WHERE.label + '：' + WHERE.text + '（' + WHERE.note + '）'; box.appendChild(line);
+  const last = document.createElement('span'); last.textContent = '更新 ' + UPDATED; box.appendChild(last);
 }
 // メールの件名や本文の頭に入れる、版の短い書き方
-const buildShort = () => [BUILDS[0].version.split(' / ')[0], BUILDS.map((b) => b.label + ' ' + b.short).join('／')].join('・');
+const buildShort = () => WHERE.text + '・更新 ' + UPDATED;
 
 function fmt(ms) {
   const d = new Date(ms);
@@ -369,7 +302,7 @@ $('#other').addEventListener('input', (e) => {
 
 // 結果を文にまとめる。「メールで送る」は宛先・件名・本文が入ったメールを開く（2026-10-18。ユーザーの指示）
 function report() {
-  const lines = ['数独テスト台帳 ' + buildShort() + ' / commit ' + COMMIT, ''];
+  const lines = ['数独テスト台帳 ' + buildShort(), ''];
   ['ng', 'ok', 'todo'].forEach((k) => {
     const arr = items().filter((it) => rec(it.id).status === k);
     if (!arr.length) return;
@@ -391,7 +324,7 @@ function report() {
 const toast = (s) => { $('#toast').textContent = s; setTimeout(() => { $('#toast').textContent = ''; }, 2500); };
 const MAIL_TO = 'karaagesoft@gmail.com';
 $('#send').addEventListener('click', () => {
-  const subject = '数独テスト台帳の結果（' + buildShort() + '・' + COMMIT + '）';
+  const subject = '数独テスト台帳の結果（' + buildShort() + '）';
   location.href = 'mailto:' + MAIL_TO + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(report());
 });
 $('#copy').addEventListener('click', async () => {
