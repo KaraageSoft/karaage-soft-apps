@@ -315,7 +315,9 @@ function report() {
   const lines = ['数独テスト台帳 ' + buildShort(), ''];
   ['ng', 'ok', 'todo'].forEach((k) => {
     const arr = items().filter((it) => rec(it.id).status === k);
-    if (!arr.length) return;
+    // その他は NG のすぐあと（NG が無くても出す。前は NG が無いと出ていなかった。2026-11-19。ユーザーの指摘）
+    const pushOther = () => { if (k === 'ng' && other.trim()) lines.push('■ その他', other.trim(), ''); };
+    if (!arr.length) { pushOther(); return; }
     lines.push('■ ' + STATUS_LABEL[k] + '（' + arr.length + '）');
     arr.forEach((it) => {
       // 1項目1確認にしたので、どの解き方の話かを頭に付ける（2026-10-24）
@@ -326,8 +328,7 @@ function report() {
       if (note) lines.push('　→ ' + note.replace(/\n/g, '\n　　'));
     });
     lines.push('');
-    // その他は NG のすぐあとに
-    if (k === 'ng' && other.trim()) lines.push('■ その他', other.trim(), '');
+    pushOther();
   });
   return lines.join('\n').trim();
 }
