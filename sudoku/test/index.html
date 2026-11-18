@@ -158,10 +158,6 @@ const UPDATED = '2026-11-18';
 // 確認項目。env は device（実機）・web（ブラウザ）・both。
 // os を 'android' か 'ios' にすると、その端末で確かめる項目になり、頭に「Android で確認」「iPhone で確認」と出る（2026-11-09）
 const ITEMS = [
-  { id: 'terms-1118', area: '11/18 に直したもの（Expo Go で試せます）', env: 'both', title: '日本語で、解法名が「XY-チェーン」（前は XY鎖）、ほぼロック集合の📖の文・見出しが「ほぼロック集合-XZ」「ほぼロック集合-XY-ウィング」（前は ALS-XZ など）になっている',
-    how: 'XY-チェーンとほぼロック集合-XZ の📖を開く。ヒントを出したときの見出しも見る。' },
-  { id: 'import-pick-big-1118', area: '11/18 に直したもの（Expo Go で試せます）', env: 'both', title: '画像から取り込むの窓の「画像を選ぶ」が大きいボタン（緑がかった青）になっている',
-    how: '問題を作る画面で「画像から取り込む」を押す。' },
 ];
 
 const ENV_LABEL = { device: '実機', web: 'ブラウザ', both: '実機・ブラウザ' };
@@ -234,7 +230,7 @@ function renderProgress() {
   });
   const bar = $('#bar'); bar.innerHTML = '';
   [['ok', 'var(--ok)'], ['ng', 'var(--ng)']].forEach(([k, color]) => {
-    const i = document.createElement('i'); i.style.width = (c[k] / all.length * 100) + '%'; i.style.background = color; bar.appendChild(i);
+    const i = document.createElement('i'); i.style.width = (all.length ? c[k] / all.length * 100 : 0) + '%'; i.style.background = color; bar.appendChild(i);
   });
 }
 
